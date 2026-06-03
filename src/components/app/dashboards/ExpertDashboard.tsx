@@ -41,14 +41,14 @@ export function ExpertDashboard({ me }: { me: MeData }) {
   if (!expertId) {
     return (
       <div>
-        <PageHeader title="Expert Dashboard" description="Your auditor profile hasn't been activated yet." />
+        <PageHeader title="Expert Dashboard" description="Your expert profile hasn't been activated yet." />
         <div className="surface-card p-8 text-sm text-muted-foreground">No expert record found for your account.</div>
       </div>
     );
   }
   return (
     <div className="space-y-6">
-      <PageHeader title={`Welcome, ${me.profile?.full_name?.split(" ")[0] ?? "Auditor"}`} description="Your audit workload and history." />
+      <PageHeader title={`Welcome, ${me.profile?.full_name?.split(" ")[0] ?? "Expert"}`} description="Your audit workload and history." />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <KpiCard label="Assigned Audits" value={data?.assigned ?? 0} icon={ClipboardList} tone="primary" />
         <KpiCard label="Pending Review" value={data?.pending ?? 0} icon={ClipboardCheck} tone="warning" />

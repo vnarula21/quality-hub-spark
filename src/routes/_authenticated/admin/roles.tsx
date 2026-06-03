@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/app/AppShell";
 const ROLES = [
   { code: "super_admin", name: "Super Admin", desc: "Full platform control. Manages users, roles, processes and platform settings.", perms: ["Create / edit / deactivate / delete users", "Create roles", "Manage permissions", "Manage platform settings", "Manage processes", "Access all reports & dashboards"] },
   { code: "admin", name: "Admin (Quality Manager)", desc: "Oversees quality operations.", perms: ["View all coaches and experts", "Review audits & challenges", "Modify audit scores & feedback", "View reports & dashboards"], cant: ["Delete users", "Change platform settings", "Publish audits"] },
-  { code: "expert", name: "Expert (Auditor)", desc: "Reviews and publishes audits.", perms: ["View assigned audits", "Upload audit material", "Review audits", "Publish final audits", "View audit history & reports"] },
+  { code: "expert", name: "Expert", desc: "Reviews and publishes audits.", perms: ["View assigned audits", "Upload audit material", "Review audits", "Publish final audits", "View audit history & reports"] },
   { code: "coach", name: "Coach", desc: "Healthcare coach delivering care to members.", perms: ["View personal dashboard", "View performance metrics & ratings", "View testimonials & success stories", "View audit results", "Accept audits", "Raise objections"] },
 ];
 

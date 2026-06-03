@@ -12,7 +12,7 @@ function Page() {
   });
   return (
     <div className="space-y-6">
-      <PageHeader title="Experts" description="Quality auditors." />
+      <PageHeader title="Experts" description="Quality experts." />
       <div className="surface-card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">

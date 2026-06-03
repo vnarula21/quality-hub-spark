@@ -85,7 +85,7 @@ export async function runFullSeed(callerUserId: string | null) {
   await supabaseAdmin.from("profiles").update({ employee_code: "EMP-C000", team_id: teams?.[0].id }).eq("id", namedAccounts.coach.id);
   await supabaseAdmin.from("profiles").update({ employee_code: "EMP-E000" }).eq("id", namedAccounts.expert.id);
   const coachProfiles: Array<{ id: string; name: string }> = [{ id: namedAccounts.coach.id, name: "Casey Coach" }];
-  const expertProfiles: Array<{ id: string; name: string }> = [{ id: namedAccounts.expert.id, name: "Avery Auditor" }];
+  const expertProfiles: Array<{ id: string; name: string }> = [{ id: namedAccounts.expert.id, name: "Avery Expert" }];
 
   for (let i = 0; i < mockCoaches.length; i++) {
     const [name, email, code] = mockCoaches[i];
