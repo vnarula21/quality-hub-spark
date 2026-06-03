@@ -2,26 +2,53 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { MeData } from "@/lib/qip/auth";
 import { PageHeader } from "../AppShell";
-import { KpiCard } from "../KpiCard";
 import { RagBadge } from "../RagBadge";
-import { ClipboardList, ClipboardCheck, History, Activity } from "lucide-react";
+import { ClipboardCheck, Users, PieChart as PieIcon, Star, Gauge, Sparkles, ArrowUp, ArrowDown, type LucideIcon } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+
+type Tone = "blue" | "emerald" | "teal" | "orange" | "purple" | "indigo";
+const toneMap: Record<Tone, { bg: string; fg: string }> = {
+  blue:    { bg: "bg-blue-100",    fg: "text-blue-600" },
+  emerald: { bg: "bg-emerald-100", fg: "text-emerald-600" },
+  teal:    { bg: "bg-teal-100",    fg: "text-teal-600" },
+  orange:  { bg: "bg-orange-100",  fg: "text-orange-600" },
+  purple:  { bg: "bg-purple-100",  fg: "text-purple-600" },
+  indigo:  { bg: "bg-indigo-100",  fg: "text-indigo-600" },
+};
+
+function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1).toISOString(); }
+function monthDateStr(d: Date) {
+  const m = new Date(d.getFullYear(), d.getMonth(), 1);
+  return `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}-01`;
+}
 
 export function ExpertDashboard({ me }: { me: MeData }) {
   const expertId = me.expertId;
-  const { data } = useQuery({
-    queryKey: ["expert-stats", expertId],
+  const userId = me.userId;
+  const { data: stats } = useQuery({
+    queryKey: ["expert-home-stats", expertId],
     enabled: !!expertId,
     queryFn: async () => {
-      const [{ data: assigned }, { data: published }, { data: pending }] = await Promise.all([
-        supabase.from("audits").select("id").eq("expert_id", expertId!),
-        supabase.from("audits").select("total_score").eq("expert_id", expertId!).eq("status", "published"),
-        supabase.from("audits").select("id").eq("expert_id", expertId!).eq("status", "pending_review"),
+      const now = new Date();
+      const som = startOfMonth(now);
+      const monthStr = monthDateStr(now);
+      const [totalThis, pubThis, pendCoach, challenges, quotaRow] = await Promise.all([
+        supabase.from("audits").select("id", { count: "exact", head: true }).eq("expert_id", expertId!).gte("created_at", som),
+        supabase.from("audits").select("id", { count: "exact", head: true }).eq("expert_id", expertId!).eq("status", "published").gte("created_at", som),
+        supabase.from("audits").select("id", { count: "exact", head: true }).eq("expert_id", expertId!).eq("status", "published").eq("accepted_by_coach", false),
+        supabase.from("challenges").select("id", { count: "exact", head: true }).eq("raised_by", userId!).gte("created_at", som),
+        supabase.from("expert_audit_quotas").select("quota").eq("expert_id", expertId!).eq("month", monthStr).maybeSingle(),
       ]);
-      const avg = (published ?? []).length
-        ? (published ?? []).reduce((s, a) => s + Number(a.total_score ?? 0), 0) / (published ?? []).length
-        : 0;
-      return { assigned: assigned?.length ?? 0, published: published?.length ?? 0, pending: pending?.length ?? 0, avg };
+      const total = totalThis.count ?? 0;
+      const pub = pubThis.count ?? 0;
+      return {
+        pubThis: pub,
+        totalThis: total,
+        quota: Number(quotaRow.data?.quota ?? 0),
+        pendCoach: pendCoach.count ?? 0,
+        completion: total > 0 ? Math.round((pub / total) * 100) : 0,
+        challenges: challenges.count ?? 0,
+      };
     },
   });
 
@@ -46,14 +73,21 @@ export function ExpertDashboard({ me }: { me: MeData }) {
       </div>
     );
   }
+
+  const tiles: Array<{ label: string; value: string | number; icon: LucideIcon; tone: Tone; suffix?: string; delta: number }> = stats ? [
+    { label: "Published / Assigned",     value: `${stats.pubThis}/${stats.quota}`,  icon: ClipboardCheck, tone: "blue",    delta: 0, suffix: stats.quota === 0 ? "No quota set" : "quota this month" },
+    { label: "Pending Coach Acceptance", value: stats.pendCoach,                    icon: Users,          tone: "emerald", delta: 0 },
+    { label: "Audit Completion Rate",    value: `${stats.completion}%`,             icon: PieIcon,        tone: "teal",    delta: 0 },
+    { label: "Overall Coach Rating",     value: "—",                                icon: Star,           tone: "orange",  delta: 0, suffix: "Source TBD" },
+    { label: "Overall Quality Score",    value: "—",                                icon: Gauge,          tone: "purple",  delta: 0, suffix: "Source TBD" },
+    { label: "AI Challenges",            value: stats.challenges,                   icon: Sparkles,       tone: "indigo",  delta: 0 },
+  ] : [];
+
   return (
     <div className="space-y-6">
       <PageHeader title={`Welcome, ${me.profile?.full_name?.split(" ")[0] ?? "Expert"}`} description="Your audit workload and history." />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <KpiCard label="Assigned Audits" value={data?.assigned ?? 0} icon={ClipboardList} tone="primary" />
-        <KpiCard label="Pending Review" value={data?.pending ?? 0} icon={ClipboardCheck} tone="warning" />
-        <KpiCard label="Published" value={data?.published ?? 0} icon={History} tone="success" />
-        <KpiCard label="Avg Score Published" value={data ? data.avg.toFixed(1) : "—"} icon={Activity} />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {tiles.map((t) => <Tile key={t.label} {...t} />)}
       </div>
       <div className="surface-card p-5">
         <div className="mb-3 flex items-center justify-between">
@@ -76,6 +110,28 @@ export function ExpertDashboard({ me }: { me: MeData }) {
           ))}
           {(!recent || recent.length === 0) && <div className="py-6 text-center text-xs text-muted-foreground">No audits yet.</div>}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Tile({ label, value, icon: Icon, tone, suffix, delta }: {
+  label: string; value: string | number; icon: LucideIcon; tone: Tone; suffix?: string; delta: number;
+}) {
+  const t = toneMap[tone];
+  const up = delta >= 0;
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+      <div className="flex items-start gap-2">
+        <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${t.bg}`}>
+          <Icon className={`h-4 w-4 ${t.fg}`} />
+        </div>
+        <div className="text-[11px] font-medium leading-tight text-slate-500">{label}</div>
+      </div>
+      <div className="mt-2 text-2xl font-bold tracking-tight text-slate-900">{value}</div>
+      <div className={`mt-0.5 flex items-center gap-1 text-[11px] ${up ? "text-emerald-600" : "text-rose-600"}`}>
+        {delta !== 0 && (up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+        <span className="text-slate-400">{suffix ?? ""}</span>
       </div>
     </div>
   );
