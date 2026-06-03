@@ -26,7 +26,13 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAuditHistoryRouteImport } from './routes/_authenticated/audit-history'
 import { Route as AuthenticatedAssignedAuditsRouteImport } from './routes/_authenticated/assigned-audits'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
+import { Route as AuthenticatedAdminProcessesRouteImport } from './routes/_authenticated/admin/processes'
+import { Route as AuthenticatedAdminPermissionsRouteImport } from './routes/_authenticated/admin/permissions'
+import { Route as AuthenticatedAdminFrameworksRouteImport } from './routes/_authenticated/admin/frameworks'
 import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin/experts'
 import { Route as AuthenticatedAdminCoachesRouteImport } from './routes/_authenticated/admin/coaches'
 import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_authenticated/admin/challenges'
@@ -124,10 +130,44 @@ const AuthenticatedAchievementsRoute =
     path: '/achievements',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/admin/settings',
+    path: '/admin/settings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminRolesRoute = AuthenticatedAdminRolesRouteImport.update({
+  id: '/admin/roles',
+  path: '/admin/roles',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminReportsRoute =
   AuthenticatedAdminReportsRouteImport.update({
     id: '/admin/reports',
     path: '/admin/reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminProcessesRoute =
+  AuthenticatedAdminProcessesRouteImport.update({
+    id: '/admin/processes',
+    path: '/admin/processes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminPermissionsRoute =
+  AuthenticatedAdminPermissionsRouteImport.update({
+    id: '/admin/permissions',
+    path: '/admin/permissions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminFrameworksRoute =
+  AuthenticatedAdminFrameworksRouteImport.update({
+    id: '/admin/frameworks',
+    path: '/admin/frameworks',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminExpertsRoute =
@@ -183,7 +223,13 @@ export interface FileRoutesByFullPath {
   '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
   '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/admin/frameworks': typeof AuthenticatedAdminFrameworksRoute
+  '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
+  '/admin/processes': typeof AuthenticatedAdminProcessesRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -207,7 +253,13 @@ export interface FileRoutesByTo {
   '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
   '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/admin/frameworks': typeof AuthenticatedAdminFrameworksRoute
+  '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
+  '/admin/processes': typeof AuthenticatedAdminProcessesRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -233,7 +285,13 @@ export interface FileRoutesById {
   '/_authenticated/admin/challenges': typeof AuthenticatedAdminChallengesRoute
   '/_authenticated/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/_authenticated/admin/frameworks': typeof AuthenticatedAdminFrameworksRoute
+  '/_authenticated/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
+  '/_authenticated/admin/processes': typeof AuthenticatedAdminProcessesRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
+  '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -259,7 +317,13 @@ export interface FileRouteTypes {
     | '/admin/challenges'
     | '/admin/coaches'
     | '/admin/experts'
+    | '/admin/frameworks'
+    | '/admin/permissions'
+    | '/admin/processes'
     | '/admin/reports'
+    | '/admin/roles'
+    | '/admin/settings'
+    | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -283,7 +347,13 @@ export interface FileRouteTypes {
     | '/admin/challenges'
     | '/admin/coaches'
     | '/admin/experts'
+    | '/admin/frameworks'
+    | '/admin/permissions'
+    | '/admin/processes'
     | '/admin/reports'
+    | '/admin/roles'
+    | '/admin/settings'
+    | '/admin/users'
   id:
     | '__root__'
     | '/'
@@ -308,7 +378,13 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/challenges'
     | '/_authenticated/admin/coaches'
     | '/_authenticated/admin/experts'
+    | '/_authenticated/admin/frameworks'
+    | '/_authenticated/admin/permissions'
+    | '/_authenticated/admin/processes'
     | '/_authenticated/admin/reports'
+    | '/_authenticated/admin/roles'
+    | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -440,11 +516,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/roles': {
+      id: '/_authenticated/admin/roles'
+      path: '/admin/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AuthenticatedAdminRolesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/reports': {
       id: '/_authenticated/admin/reports'
       path: '/admin/reports'
       fullPath: '/admin/reports'
       preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/processes': {
+      id: '/_authenticated/admin/processes'
+      path: '/admin/processes'
+      fullPath: '/admin/processes'
+      preLoaderRoute: typeof AuthenticatedAdminProcessesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/permissions': {
+      id: '/_authenticated/admin/permissions'
+      path: '/admin/permissions'
+      fullPath: '/admin/permissions'
+      preLoaderRoute: typeof AuthenticatedAdminPermissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/frameworks': {
+      id: '/_authenticated/admin/frameworks'
+      path: '/admin/frameworks'
+      fullPath: '/admin/frameworks'
+      preLoaderRoute: typeof AuthenticatedAdminFrameworksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/experts': {
@@ -503,7 +621,13 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminChallengesRoute: typeof AuthenticatedAdminChallengesRoute
   AuthenticatedAdminCoachesRoute: typeof AuthenticatedAdminCoachesRoute
   AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
+  AuthenticatedAdminFrameworksRoute: typeof AuthenticatedAdminFrameworksRoute
+  AuthenticatedAdminPermissionsRoute: typeof AuthenticatedAdminPermissionsRoute
+  AuthenticatedAdminProcessesRoute: typeof AuthenticatedAdminProcessesRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
+  AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -524,7 +648,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminChallengesRoute: AuthenticatedAdminChallengesRoute,
   AuthenticatedAdminCoachesRoute: AuthenticatedAdminCoachesRoute,
   AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
+  AuthenticatedAdminFrameworksRoute: AuthenticatedAdminFrameworksRoute,
+  AuthenticatedAdminPermissionsRoute: AuthenticatedAdminPermissionsRoute,
+  AuthenticatedAdminProcessesRoute: AuthenticatedAdminProcessesRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
+  AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
+  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
