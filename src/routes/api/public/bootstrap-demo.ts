@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { runBootstrapSeed } from "@/lib/qip/seed.functions";
 
 export const Route = createFileRoute("/api/public/bootstrap-demo")({
   server: {
     handlers: {
       POST: async () => {
         try {
+          const { runBootstrapSeed } = await import("@/lib/qip/seed.server");
           const result = await runBootstrapSeed();
           return Response.json(result);
         } catch (e: any) {
