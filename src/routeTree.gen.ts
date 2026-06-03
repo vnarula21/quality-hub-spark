@@ -26,8 +26,12 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAuditHistoryRouteImport } from './routes/_authenticated/audit-history'
 import { Route as AuthenticatedAssignedAuditsRouteImport } from './routes/_authenticated/assigned-audits'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
+import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
+import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin/experts'
+import { Route as AuthenticatedAdminCoachesRouteImport } from './routes/_authenticated/admin/coaches'
 import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_authenticated/admin/challenges'
 import { Route as AuthenticatedAdminAuditsRouteImport } from './routes/_authenticated/admin/audits'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -120,6 +124,24 @@ const AuthenticatedAchievementsRoute =
     path: '/achievements',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminReportsRoute =
+  AuthenticatedAdminReportsRouteImport.update({
+    id: '/admin/reports',
+    path: '/admin/reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminExpertsRoute =
+  AuthenticatedAdminExpertsRouteImport.update({
+    id: '/admin/experts',
+    path: '/admin/experts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminCoachesRoute =
+  AuthenticatedAdminCoachesRouteImport.update({
+    id: '/admin/coaches',
+    path: '/admin/coaches',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminChallengesRoute =
   AuthenticatedAdminChallengesRouteImport.update({
     id: '/admin/challenges',
@@ -130,6 +152,12 @@ const AuthenticatedAdminAuditsRoute =
   AuthenticatedAdminAuditsRouteImport.update({
     id: '/admin/audits',
     path: '/admin/audits',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/admin/analytics',
+    path: '/admin/analytics',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -150,8 +178,12 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/audits': typeof AuthenticatedAdminAuditsRoute
   '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
+  '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
+  '/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -170,8 +202,12 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/reports': typeof AuthenticatedReportsRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/audits': typeof AuthenticatedAdminAuditsRoute
   '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
+  '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
+  '/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -192,8 +228,12 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/audits': typeof AuthenticatedAdminAuditsRoute
   '/_authenticated/admin/challenges': typeof AuthenticatedAdminChallengesRoute
+  '/_authenticated/admin/coaches': typeof AuthenticatedAdminCoachesRoute
+  '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -214,8 +254,12 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/reports'
+    | '/admin/analytics'
     | '/admin/audits'
     | '/admin/challenges'
+    | '/admin/coaches'
+    | '/admin/experts'
+    | '/admin/reports'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -234,8 +278,12 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/profile'
     | '/reports'
+    | '/admin/analytics'
     | '/admin/audits'
     | '/admin/challenges'
+    | '/admin/coaches'
+    | '/admin/experts'
+    | '/admin/reports'
   id:
     | '__root__'
     | '/'
@@ -255,8 +303,12 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
     | '/_authenticated/reports'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/audits'
     | '/_authenticated/admin/challenges'
+    | '/_authenticated/admin/coaches'
+    | '/_authenticated/admin/experts'
+    | '/_authenticated/admin/reports'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -388,6 +440,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/reports': {
+      id: '/_authenticated/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/experts': {
+      id: '/_authenticated/admin/experts'
+      path: '/admin/experts'
+      fullPath: '/admin/experts'
+      preLoaderRoute: typeof AuthenticatedAdminExpertsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/coaches': {
+      id: '/_authenticated/admin/coaches'
+      path: '/admin/coaches'
+      fullPath: '/admin/coaches'
+      preLoaderRoute: typeof AuthenticatedAdminCoachesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/challenges': {
       id: '/_authenticated/admin/challenges'
       path: '/admin/challenges'
@@ -400,6 +473,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/audits'
       fullPath: '/admin/audits'
       preLoaderRoute: typeof AuthenticatedAdminAuditsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -418,8 +498,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminAuditsRoute: typeof AuthenticatedAdminAuditsRoute
   AuthenticatedAdminChallengesRoute: typeof AuthenticatedAdminChallengesRoute
+  AuthenticatedAdminCoachesRoute: typeof AuthenticatedAdminCoachesRoute
+  AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
+  AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -435,8 +519,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminAuditsRoute: AuthenticatedAdminAuditsRoute,
   AuthenticatedAdminChallengesRoute: AuthenticatedAdminChallengesRoute,
+  AuthenticatedAdminCoachesRoute: AuthenticatedAdminCoachesRoute,
+  AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
+  AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
