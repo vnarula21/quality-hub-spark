@@ -5,10 +5,8 @@ import type { MeData } from "@/lib/qip/auth";
 import {
   ClipboardCheck,
   CheckCircle2,
-  UserSearch,
   ShieldCheck,
   Users,
-  MessageSquare,
   Sparkles,
   PieChart as PieIcon,
   Calendar,
@@ -20,6 +18,9 @@ import {
   FileBarChart,
   ArrowUp,
   ArrowDown,
+  Star,
+  Gauge,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -39,6 +40,10 @@ const toneMap: Record<Tone, { bg: string; fg: string }> = {
 
 function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1).toISOString(); }
 function startOfPrevMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() - 1, 1).toISOString(); }
+function monthDateStr(d: Date) {
+  const m = new Date(d.getFullYear(), d.getMonth(), 1);
+  return `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}-01`;
+}
 
 async function countRange(filterFn: (q: any) => any) {
   const q = supabase.from("audits").select("id", { count: "exact", head: true });
@@ -53,32 +58,26 @@ export function AdminDashboard({ me }: { me: MeData }) {
       const now = new Date();
       const som = startOfMonth(now);
       const sopm = startOfPrevMonth(now);
+      const monthStr = monthDateStr(now);
 
       const [
         totalThis, totalPrev,
         pubThis, pubPrev,
-        pendExpert, pendExpertPrev,
-        pendAdmin, pendAdminPrev,
         pendCoach, pendCoachPrev,
-        objections, objectionsPrev,
-        challenges, challengesPrev,
+        challengesThis, challengesPrev,
         coaches,
+        quotas,
       ] = await Promise.all([
         countRange((q) => q.gte("created_at", som)),
         countRange((q) => q.gte("created_at", sopm).lt("created_at", som)),
         countRange((q) => q.eq("status", "published").gte("created_at", som)),
         countRange((q) => q.eq("status", "published").gte("created_at", sopm).lt("created_at", som)),
-        countRange((q) => q.in("status", ["scheduled", "in_progress"])),
-        countRange((q) => q.in("status", ["scheduled", "in_progress"]).lt("created_at", som)),
-        countRange((q) => q.eq("status", "pending_review")),
-        countRange((q) => q.eq("status", "pending_review").lt("created_at", som)),
         countRange((q) => q.eq("status", "published").eq("accepted_by_coach", false)),
         countRange((q) => q.eq("status", "published").eq("accepted_by_coach", false).lt("created_at", som)),
-        supabase.from("coach_objections").select("id", { count: "exact", head: true }).eq("status", "open"),
-        supabase.from("coach_objections").select("id", { count: "exact", head: true }).eq("status", "open").lt("created_at", som),
-        supabase.from("challenges").select("id", { count: "exact", head: true }).eq("status", "open"),
-        supabase.from("challenges").select("id", { count: "exact", head: true }).eq("status", "open").lt("created_at", som),
+        supabase.from("challenges").select("id", { count: "exact", head: true }).gte("created_at", som),
+        supabase.from("challenges").select("id", { count: "exact", head: true }).gte("created_at", sopm).lt("created_at", som),
         supabase.from("coaches").select("current_rag"),
+        supabase.from("expert_audit_quotas").select("quota").eq("month", monthStr),
       ]);
 
       const completion = totalThis > 0 ? Math.round((pubThis / totalThis) * 100) : 0;
@@ -91,17 +90,16 @@ export function AdminDashboard({ me }: { me: MeData }) {
         else if (c.current_rag === "red") rag.red++;
         else rag.none++;
       });
+      const totalQuota = (quotas.data ?? []).reduce((s: number, r: any) => s + Number(r.quota ?? 0), 0);
       return {
         totalThis, totalPrev,
         pubThis, pubPrev,
-        pendExpert, pendExpertPrev,
-        pendAdmin, pendAdminPrev,
         pendCoach, pendCoachPrev,
-        objections: objections.count ?? 0, objectionsPrev: objectionsPrev.count ?? 0,
-        challenges: challenges.count ?? 0, challengesPrev: challengesPrev.count ?? 0,
+        challenges: challengesThis.count ?? 0, challengesPrev: challengesPrev.count ?? 0,
         completion, completionPrev,
         totalCoaches: cs.length,
         rag,
+        totalQuota,
       };
     },
   });
@@ -125,14 +123,12 @@ export function AdminDashboard({ me }: { me: MeData }) {
     label: string; value: string | number; icon: LucideIcon; tone: Tone;
     delta: number; suffix?: string;
   }> = stats ? [
-    { label: "Total Audits This Month", value: stats.totalThis, icon: ClipboardCheck, tone: "blue",   delta: pct(stats.totalThis, stats.totalPrev) },
-    { label: "Published Audits",        value: stats.pubThis,   icon: CheckCircle2,   tone: "green",  delta: pct(stats.pubThis, stats.pubPrev), suffix: `${stats.totalThis ? Math.round(stats.pubThis/stats.totalThis*100) : 0}% of total audits` },
-    { label: "Pending Expert Review",   value: stats.pendExpert,icon: UserSearch,     tone: "orange", delta: diff(stats.pendExpert, stats.pendExpertPrev) },
-    { label: "Pending Admin Review",    value: stats.pendAdmin, icon: ShieldCheck,    tone: "purple", delta: diff(stats.pendAdmin, stats.pendAdminPrev) },
-    { label: "Pending Coach Acceptance",value: stats.pendCoach, icon: Users,          tone: "emerald",delta: diff(stats.pendCoach, stats.pendCoachPrev) },
-    { label: "Coach Objections",        value: stats.objections,icon: MessageSquare,  tone: "rose",   delta: diff(stats.objections, stats.objectionsPrev) },
-    { label: "AI Challenges",           value: stats.challenges,icon: Sparkles,       tone: "indigo", delta: diff(stats.challenges, stats.challengesPrev) },
-    { label: "Audit Completion Rate",   value: `${stats.completion}%`, icon: PieIcon, tone: "teal",   delta: stats.completion - stats.completionPrev },
+    { label: "Published / Assigned",     value: `${stats.pubThis}/${stats.totalQuota}`, icon: ClipboardCheck, tone: "blue",   delta: pct(stats.pubThis, stats.pubPrev), suffix: stats.totalQuota === 0 ? "Set quotas in Experts" : `quota this month` },
+    { label: "Pending Coach Acceptance", value: stats.pendCoach,        icon: Users,          tone: "emerald",delta: diff(stats.pendCoach, stats.pendCoachPrev) },
+    { label: "Audit Completion Rate",    value: `${stats.completion}%`, icon: PieIcon,        tone: "teal",   delta: stats.completion - stats.completionPrev },
+    { label: "Overall Coach Rating",     value: "—",                    icon: Star,           tone: "orange", delta: 0, suffix: "Source TBD" },
+    { label: "Overall Quality Score",    value: "—",                    icon: Gauge,          tone: "purple", delta: 0, suffix: "Source TBD" },
+    { label: "AI Challenges",            value: stats.challenges,       icon: Sparkles,       tone: "indigo", delta: diff(stats.challenges, stats.challengesPrev) },
   ] : [];
 
   const totalCoaches = stats?.totalCoaches ?? 0;
@@ -164,8 +160,8 @@ export function AdminDashboard({ me }: { me: MeData }) {
         </div>
       </div>
 
-      {/* KPI Tiles — single row on xl */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
+      {/* KPI Tiles — single row of 6 on lg+ */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((t) => (
           <KpiTile key={t.label} {...t} prevLabel={prevMonthLabel} />
         ))}
