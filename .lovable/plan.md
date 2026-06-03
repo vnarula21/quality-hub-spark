@@ -1,54 +1,45 @@
-## Admin Dashboard Redesign — match attached mockup
+## Goal
 
-Rebuild `src/components/app/dashboards/AdminDashboard.tsx` to mirror the uploaded screenshot exactly, fitting in one viewport (no scroll on ~1032×575+ desktop).
+Replace the 8 KPI tiles on the Admin Dashboard (and parallel tiles on the Expert Dashboard) with 6 focused tiles, and add a monthly audit quota system so admins can set how many audits each expert should publish each month.
 
-### Layout (3 rows, no scroll)
+## New 6 KPI Tiles
 
-```
-Row 1 — Welcome header + filters (date range, process filter)
-Row 2 — 8 KPI tiles in a single horizontal row
-Row 3 — RAG Distribution donut (left, ~1/3) + Top Performing Coaches table (right, ~2/3)
-Row 4 — Quick Actions: 6 horizontal action cards
-```
+1. **Published / Assigned Audits** — `published this month / monthly quota` (sum of quotas across all experts on the admin dashboard; the expert's own quota on the expert dashboard).
+2. **Pending Coach Acceptance** — audits with `status = 'published'` and `accepted_by_coach = false`.
+3. **Audit Completion Rate** — published ÷ total audits this month (%).
+4. **Overall Coach Rating** — placeholder tile (value source to be defined later by the user; show `—` for now with a small "TBD" hint).
+5. **Overall Coach Quality Score** — placeholder tile (same as above).
+6. **AI Challenges** — count of `challenges` raised this month (any status), all-rows for admin, filtered by `raised_by = me` for expert.
 
-### KPI tiles (exact order + labels from mockup)
-1. Total Audits This Month — clipboard icon, blue
-2. Published Audits — check circle, green
-3. Pending Expert Review — user icon, orange
-4. Pending Admin Review — shield, purple
-5. Pending Coach Acceptance — users, green
-6. Coach Objections — chat, red/pink
-7. AI Challenges — star, blue
-8. Audit Completion Rate — circle %, teal
+The RAG Distribution, Top Performing Coaches, and Quick Actions sections below stay unchanged.
 
-Each tile: soft pastel circular icon bg, label (top, small gray), big number (3xl), delta line with up/down arrow + "vs Apr 2025".
+## Database Changes
 
-### RAG Distribution card
-Donut with center label "185 Total Coaches", legend right side: Green 122 (66%), Amber 40 (22%), Red 18 (10%), Not Rated 5 (2%). Colors match mockup (green/amber/red/gray).
+New table `expert_audit_quotas`:
+- `expert_id uuid` → experts.id
+- `month date` (first of month)
+- `quota int` (target number of published audits)
+- unique (expert_id, month)
+- RLS: experts read own; admin/super_admin manage all
+- GRANTs for authenticated + service_role
 
-### Top Performing Coaches table
-Columns: Rank (trophy icon for top 3), Coach Name, Quality Score, CPI, Rating, RAG Status (pill), Audits Completed (This Month). 5 rows. "View all coaches" link top-right.
+## Admin UI for Quotas
 
-### Quick Actions row
-6 cards: Assign Audits, Review Challenges, Review Objections, Add Coach, Add Expert, Generate Reports — icon + title + subtitle + chevron right.
+Add a "Audit Quotas" section to `/admin/experts` (existing page):
+- Table of experts × current month with editable quota input
+- Save updates `expert_audit_quotas` via a `createServerFn` mutation
+- Default quota = 0 if no row exists
 
-### Color theme (light, matches mockup)
-- Background: near-white `#f7f8fa`
-- Card: white with subtle border + soft shadow
-- Tile icon backgrounds: soft tints (blue-50, green-50, orange-50, purple-50, red-50, teal-50)
-- Text: slate-900 headings, slate-500 labels
-- Keep existing dark sidebar; only redesign main content surface to light theme for admin dashboard.
+## Files Changed
 
-### Density / no-scroll
-- Use compact spacing (`gap-3`, `p-4`), `text-2xl` for KPI numbers (not 3xl), `text-[11px]` labels, table row height `py-2`.
-- Quick Actions one row (6 cols on lg, wrap on smaller).
-- KPI row: 8 cols on xl, 4 on lg, 2 on sm.
+- `supabase/migrations/...` — new table + RLS + GRANTs
+- `src/components/app/dashboards/AdminDashboard.tsx` — swap tiles array, add quota query
+- `src/components/app/dashboards/ExpertDashboard.tsx` — same 6 tiles scoped to the expert
+- `src/routes/_authenticated/admin/experts.tsx` — add quota editor section
+- `src/lib/qip/quotas.functions.ts` (new) — getQuotas / setQuota serverFns
 
-### Data wiring
-Reuse existing queries in `AdminDashboard.tsx`; add queries for:
-- Published audits count, pending expert/admin/coach-acceptance counts, AI challenges count, audit completion rate %, deltas vs prior month (compute from `audits` created_at).
-- Top coaches: add `audits_completed_this_month` via count query on `audits` per coach for current month.
+## Behavior Notes
 
-### Files
-- Rewrite `src/components/app/dashboards/AdminDashboard.tsx` only.
-- No route or auth changes. No sidebar changes.
+- "This month" = from start of current calendar month.
+- If total quota = 0, the tile shows `published / 0` with a subtle "Set quotas" link to `/admin/experts`.
+- Placeholder tiles (Rating, Quality Score) render the same KpiTile shell with value `—` and footer text "Source TBD".
