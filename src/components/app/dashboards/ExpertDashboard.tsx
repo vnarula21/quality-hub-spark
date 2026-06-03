@@ -24,7 +24,7 @@ function monthDateStr(d: Date) {
 
 export function ExpertDashboard({ me }: { me: MeData }) {
   const expertId = me.expertId;
-  const userId = me.userId;
+  const userId = me.user?.id;
   const { data: stats } = useQuery({
     queryKey: ["expert-home-stats", expertId],
     enabled: !!expertId,
