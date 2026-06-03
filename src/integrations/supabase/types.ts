@@ -463,6 +463,33 @@ export type Database = {
           },
         ]
       }
+      expert_audit_quotas: {
+        Row: {
+          created_at: string
+          expert_id: string
+          id: string
+          month: string
+          quota: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expert_id: string
+          id?: string
+          month: string
+          quota?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expert_id?: string
+          id?: string
+          month?: string
+          quota?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       experts: {
         Row: {
           created_at: string
