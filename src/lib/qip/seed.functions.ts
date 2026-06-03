@@ -41,7 +41,7 @@ export const resetAndSeed = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Wipe domain data (keep auth users + roles + profiles)
-    for (const t of [
+    const tables = [
       "audit_status_history",
       "audit_scores",
       "audit_feedback",
@@ -59,8 +59,9 @@ export const resetAndSeed = createServerFn({ method: "POST" })
       "audit_frameworks",
       "processes",
       "teams",
-    ]) {
-      await supabaseAdmin.from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    ] as const;
+    for (const t of tables) {
+      await (supabaseAdmin as any).from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
     }
 
     // Teams
@@ -295,12 +296,13 @@ export const wipeData = createServerFn({ method: "POST" })
     const { supabase, userId } = context as any;
     await ensureSuperAdmin(supabase, userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    for (const t of [
+    const tables = [
       "audit_status_history","audit_scores","audit_feedback","challenges","coach_objections",
       "audits","ratings","testimonials","success_stories","rag_reports","achievements",
       "notifications","coaches","experts","audit_frameworks","processes","teams"
-    ]) {
-      await supabaseAdmin.from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    ] as const;
+    for (const t of tables) {
+      await (supabaseAdmin as any).from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
     }
     return { ok: true };
   });
