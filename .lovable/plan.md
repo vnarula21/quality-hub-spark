@@ -1,45 +1,37 @@
 ## Goal
 
-Replace the 8 KPI tiles on the Admin Dashboard (and parallel tiles on the Expert Dashboard) with 6 focused tiles, and add a monthly audit quota system so admins can set how many audits each expert should publish each month.
+Redesign the Coach Dashboard to match the reference screenshot — 4 hero KPI tiles on top, a 3-up middle row (Performance Trend, RAG Trend, Leaderboards), and a Quick Actions row at the bottom.
 
-## New 6 KPI Tiles
+## Top Row — 4 hero KPI tiles
 
-1. **Published / Assigned Audits** — `published this month / monthly quota` (sum of quotas across all experts on the admin dashboard; the expert's own quota on the expert dashboard).
-2. **Pending Coach Acceptance** — audits with `status = 'published'` and `accepted_by_coach = false`.
-3. **Audit Completion Rate** — published ÷ total audits this month (%).
-4. **Overall Coach Rating** — placeholder tile (value source to be defined later by the user; show `—` for now with a small "TBD" hint).
-5. **Overall Coach Quality Score** — placeholder tile (same as above).
-6. **AI Challenges** — count of `challenges` raised this month (any status), all-rows for admin, filtered by `raised_by = me` for expert.
+Replace the current 8-tile grid with 4 large cards:
 
-The RAG Distribution, Top Performing Coaches, and Quick Actions sections below stay unchanged.
+1. **Quality Score** — big number `/100`, "+X pts vs prev month" pill, mini sparkline (area), green "Excellent Quality!" footer.
+2. **RAG Status** — large GREEN/AMBER/RED pill, mini horizontal stacked bar showing the coach's % of months in each RAG band over the last 6 months, contextual footer ("Keep maintaining…", "Needs attention", etc.).
+3. **Coach Performance Index (CPI)** — big number `/100`, "+X pts vs prev month" pill, mini sparkline, "Outstanding!" / "Top 1% of coaches" footer.
+4. **Current Rating** — big number, 5-star visual, "+X vs prev month" pill, "Excellent Feedback!" footer.
 
-## Database Changes
+Each tile uses a soft tinted background (emerald, slate, indigo, amber) and a colored corner icon badge, matching the reference.
 
-New table `expert_audit_quotas`:
-- `expert_id uuid` → experts.id
-- `month date` (first of month)
-- `quota int` (target number of published audits)
-- unique (expert_id, month)
-- RLS: experts read own; admin/super_admin manage all
-- GRANTs for authenticated + service_role
+## Middle Row — 3 panels
 
-## Admin UI for Quotas
+1. **Performance Trend (Last 6 Months)** — line chart with two series: Quality Score (green) and CPI Score (blue), end-of-line value labels, "View full performance" link.
+2. **RAG Trend (Last 6 Months)** — Since RAG is a single value per month, render a **6-cell horizontal timeline strip**: one rounded square per month (Dec…May), filled green/amber/red, month label below, and the latest cell slightly larger/ringed. Below the strip: small legend (Green/Amber/Red) and "View RAG history" link. This reads as a trend without faking stacked %.
+3. **Leaderboards** — tabs (Top Coaches / Most Improved / Top Rated), ranked list of 5 with medal icons for top 3 and CPI on the right, "See full leaderboard" link.
 
-Add a "Audit Quotas" section to `/admin/experts` (existing page):
-- Table of experts × current month with editable quota input
-- Save updates `expert_audit_quotas` via a `createServerFn` mutation
-- Default quota = 0 if no row exists
+## Bottom Row — Quick Actions
+
+Horizontal row of 6 action cards (icon + title + subtitle + chevron):
+View My Audits, View My Performance, View My Ratings, View Testimonials, View Success Stories, View Achievements. Each links to the existing route.
 
 ## Files Changed
 
-- `supabase/migrations/...` — new table + RLS + GRANTs
-- `src/components/app/dashboards/AdminDashboard.tsx` — swap tiles array, add quota query
-- `src/components/app/dashboards/ExpertDashboard.tsx` — same 6 tiles scoped to the expert
-- `src/routes/_authenticated/admin/experts.tsx` — add quota editor section
-- `src/lib/qip/quotas.functions.ts` (new) — getQuotas / setQuota serverFns
+- `src/components/app/dashboards/CoachDashboard.tsx` — full visual rewrite (queries reused; add a "previous month" delta query and a 6-month RAG strip query).
+- `src/styles.css` — add soft tile background tokens if needed (emerald/indigo/amber/slate tints) to keep usage of semantic tokens.
 
 ## Behavior Notes
 
-- "This month" = from start of current calendar month.
-- If total quota = 0, the tile shows `published / 0` with a subtle "Set quotas" link to `/admin/experts`.
-- Placeholder tiles (Rating, Quality Score) render the same KpiTile shell with value `—` and footer text "Source TBD".
+- Deltas (e.g. "+6.8 pts vs Apr") computed by comparing current month vs prior month from `rag_reports` / `ratings` / `coaches` snapshot.
+- RAG strip uses the last 6 entries from `rag_reports` for the coach; if fewer than 6, left-pad with empty cells.
+- All data sources stay the same — no DB changes.
+- No new routes; Quick Actions link to existing `/my-*` pages.
