@@ -132,7 +132,7 @@ export function AppSidebar({ role, name }: { role: AppRole; name: string }) {
                   return (
                     <SidebarMenuItem key={item.url}>
                       <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                        <Link to={item.url} className={cn("flex items-center gap-3", active && "bg-sidebar-accent text-sidebar-primary font-medium")}>
+                        <Link to={item.url as never} className={cn("flex items-center gap-3", active && "bg-sidebar-accent text-sidebar-primary font-medium")}>
                           <item.icon className="h-4 w-4 shrink-0" />
                           <span>{item.title}</span>
                         </Link>
