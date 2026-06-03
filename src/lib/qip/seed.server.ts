@@ -112,7 +112,7 @@ export async function runFullSeed(callerUserId: string | null) {
   }
 
   const ragOrder = ["green", "green", "amber", "green", "amber", "red", "green", "amber"] as const;
-  const coachInserts = coachProfiles.map((c, i) => ({
+  const coachInserts = coachProfiles.map((c: { id: string }, i: number) => ({
     profile_id: c.id,
     team_id: teams?.[i % teams.length].id,
     hire_date: new Date(Date.now() - (300 + i * 60) * 86400000).toISOString().slice(0, 10),
