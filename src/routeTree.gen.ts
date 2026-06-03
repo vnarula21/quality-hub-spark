@@ -14,6 +14,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMyTestimonialsRouteImport } from './routes/_authenticated/my-testimonials'
@@ -22,8 +23,11 @@ import { Route as AuthenticatedMyRatingsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedMyPerformanceRouteImport } from './routes/_authenticated/my-performance'
 import { Route as AuthenticatedMyAuditsRouteImport } from './routes/_authenticated/my-audits'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAuditHistoryRouteImport } from './routes/_authenticated/audit-history'
 import { Route as AuthenticatedAssignedAuditsRouteImport } from './routes/_authenticated/assigned-audits'
 import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
+import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_authenticated/admin/challenges'
+import { Route as AuthenticatedAdminAuditsRouteImport } from './routes/_authenticated/admin/audits'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -48,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
@@ -93,6 +102,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAuditHistoryRoute =
+  AuthenticatedAuditHistoryRouteImport.update({
+    id: '/audit-history',
+    path: '/audit-history',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAssignedAuditsRoute =
   AuthenticatedAssignedAuditsRouteImport.update({
     id: '/assigned-audits',
@@ -105,6 +120,18 @@ const AuthenticatedAchievementsRoute =
     path: '/achievements',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminChallengesRoute =
+  AuthenticatedAdminChallengesRouteImport.update({
+    id: '/admin/challenges',
+    path: '/admin/challenges',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminAuditsRoute =
+  AuthenticatedAdminAuditsRouteImport.update({
+    id: '/admin/audits',
+    path: '/admin/audits',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -113,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/achievements': typeof AuthenticatedAchievementsRoute
   '/assigned-audits': typeof AuthenticatedAssignedAuditsRoute
+  '/audit-history': typeof AuthenticatedAuditHistoryRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/my-audits': typeof AuthenticatedMyAuditsRoute
   '/my-performance': typeof AuthenticatedMyPerformanceRoute
@@ -121,6 +149,9 @@ export interface FileRoutesByFullPath {
   '/my-testimonials': typeof AuthenticatedMyTestimonialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/admin/audits': typeof AuthenticatedAdminAuditsRoute
+  '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -129,6 +160,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/achievements': typeof AuthenticatedAchievementsRoute
   '/assigned-audits': typeof AuthenticatedAssignedAuditsRoute
+  '/audit-history': typeof AuthenticatedAuditHistoryRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/my-audits': typeof AuthenticatedMyAuditsRoute
   '/my-performance': typeof AuthenticatedMyPerformanceRoute
@@ -137,6 +169,9 @@ export interface FileRoutesByTo {
   '/my-testimonials': typeof AuthenticatedMyTestimonialsRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/admin/audits': typeof AuthenticatedAdminAuditsRoute
+  '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -147,6 +182,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
   '/_authenticated/assigned-audits': typeof AuthenticatedAssignedAuditsRoute
+  '/_authenticated/audit-history': typeof AuthenticatedAuditHistoryRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/my-audits': typeof AuthenticatedMyAuditsRoute
   '/_authenticated/my-performance': typeof AuthenticatedMyPerformanceRoute
@@ -155,6 +191,9 @@ export interface FileRoutesById {
   '/_authenticated/my-testimonials': typeof AuthenticatedMyTestimonialsRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/admin/audits': typeof AuthenticatedAdminAuditsRoute
+  '/_authenticated/admin/challenges': typeof AuthenticatedAdminChallengesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -165,6 +204,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/achievements'
     | '/assigned-audits'
+    | '/audit-history'
     | '/dashboard'
     | '/my-audits'
     | '/my-performance'
@@ -173,6 +213,9 @@ export interface FileRouteTypes {
     | '/my-testimonials'
     | '/notifications'
     | '/profile'
+    | '/reports'
+    | '/admin/audits'
+    | '/admin/challenges'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -181,6 +224,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/achievements'
     | '/assigned-audits'
+    | '/audit-history'
     | '/dashboard'
     | '/my-audits'
     | '/my-performance'
@@ -189,6 +233,9 @@ export interface FileRouteTypes {
     | '/my-testimonials'
     | '/notifications'
     | '/profile'
+    | '/reports'
+    | '/admin/audits'
+    | '/admin/challenges'
   id:
     | '__root__'
     | '/'
@@ -198,6 +245,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/achievements'
     | '/_authenticated/assigned-audits'
+    | '/_authenticated/audit-history'
     | '/_authenticated/dashboard'
     | '/_authenticated/my-audits'
     | '/_authenticated/my-performance'
@@ -206,6 +254,9 @@ export interface FileRouteTypes {
     | '/_authenticated/my-testimonials'
     | '/_authenticated/notifications'
     | '/_authenticated/profile'
+    | '/_authenticated/reports'
+    | '/_authenticated/admin/audits'
+    | '/_authenticated/admin/challenges'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -252,6 +303,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -309,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/audit-history': {
+      id: '/_authenticated/audit-history'
+      path: '/audit-history'
+      fullPath: '/audit-history'
+      preLoaderRoute: typeof AuthenticatedAuditHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/assigned-audits': {
       id: '/_authenticated/assigned-audits'
       path: '/assigned-audits'
@@ -323,12 +388,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/challenges': {
+      id: '/_authenticated/admin/challenges'
+      path: '/admin/challenges'
+      fullPath: '/admin/challenges'
+      preLoaderRoute: typeof AuthenticatedAdminChallengesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/audits': {
+      id: '/_authenticated/admin/audits'
+      path: '/admin/audits'
+      fullPath: '/admin/audits'
+      preLoaderRoute: typeof AuthenticatedAdminAuditsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
   AuthenticatedAssignedAuditsRoute: typeof AuthenticatedAssignedAuditsRoute
+  AuthenticatedAuditHistoryRoute: typeof AuthenticatedAuditHistoryRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMyAuditsRoute: typeof AuthenticatedMyAuditsRoute
   AuthenticatedMyPerformanceRoute: typeof AuthenticatedMyPerformanceRoute
@@ -337,11 +417,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMyTestimonialsRoute: typeof AuthenticatedMyTestimonialsRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedAdminAuditsRoute: typeof AuthenticatedAdminAuditsRoute
+  AuthenticatedAdminChallengesRoute: typeof AuthenticatedAdminChallengesRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
   AuthenticatedAssignedAuditsRoute: AuthenticatedAssignedAuditsRoute,
+  AuthenticatedAuditHistoryRoute: AuthenticatedAuditHistoryRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMyAuditsRoute: AuthenticatedMyAuditsRoute,
   AuthenticatedMyPerformanceRoute: AuthenticatedMyPerformanceRoute,
@@ -350,6 +434,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMyTestimonialsRoute: AuthenticatedMyTestimonialsRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedAdminAuditsRoute: AuthenticatedAdminAuditsRoute,
+  AuthenticatedAdminChallengesRoute: AuthenticatedAdminChallengesRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
