@@ -9,38 +9,422 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedMyTestimonialsRouteImport } from './routes/_authenticated/my-testimonials'
+import { Route as AuthenticatedMySuccessStoriesRouteImport } from './routes/_authenticated/my-success-stories'
+import { Route as AuthenticatedMyRatingsRouteImport } from './routes/_authenticated/my-ratings'
+import { Route as AuthenticatedMyPerformanceRouteImport } from './routes/_authenticated/my-performance'
+import { Route as AuthenticatedMyAuditsRouteImport } from './routes/_authenticated/my-audits'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAuditHistoryRouteImport } from './routes/_authenticated/audit-history'
+import { Route as AuthenticatedAssignedAuditsRouteImport } from './routes/_authenticated/assigned-audits'
+import { Route as AuthenticatedAchievementsRouteImport } from './routes/_authenticated/achievements'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
+import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
+import { Route as AuthenticatedAdminProcessesRouteImport } from './routes/_authenticated/admin/processes'
+import { Route as AuthenticatedAdminPermissionsRouteImport } from './routes/_authenticated/admin/permissions'
+import { Route as AuthenticatedAdminFrameworksRouteImport } from './routes/_authenticated/admin/frameworks'
+import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin/experts'
+import { Route as AuthenticatedAdminCoachesRouteImport } from './routes/_authenticated/admin/coaches'
+import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_authenticated/admin/challenges'
+import { Route as AuthenticatedAdminAuditsRouteImport } from './routes/_authenticated/admin/audits'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin/analytics'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMyTestimonialsRoute =
+  AuthenticatedMyTestimonialsRouteImport.update({
+    id: '/my-testimonials',
+    path: '/my-testimonials',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMySuccessStoriesRoute =
+  AuthenticatedMySuccessStoriesRouteImport.update({
+    id: '/my-success-stories',
+    path: '/my-success-stories',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMyRatingsRoute = AuthenticatedMyRatingsRouteImport.update({
+  id: '/my-ratings',
+  path: '/my-ratings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMyPerformanceRoute =
+  AuthenticatedMyPerformanceRouteImport.update({
+    id: '/my-performance',
+    path: '/my-performance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMyAuditsRoute = AuthenticatedMyAuditsRouteImport.update({
+  id: '/my-audits',
+  path: '/my-audits',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAuditHistoryRoute =
+  AuthenticatedAuditHistoryRouteImport.update({
+    id: '/audit-history',
+    path: '/audit-history',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAssignedAuditsRoute =
+  AuthenticatedAssignedAuditsRouteImport.update({
+    id: '/assigned-audits',
+    path: '/assigned-audits',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAchievementsRoute =
+  AuthenticatedAchievementsRouteImport.update({
+    id: '/achievements',
+    path: '/achievements',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/admin/settings',
+    path: '/admin/settings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminRolesRoute = AuthenticatedAdminRolesRouteImport.update({
+  id: '/admin/roles',
+  path: '/admin/roles',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminReportsRoute =
+  AuthenticatedAdminReportsRouteImport.update({
+    id: '/admin/reports',
+    path: '/admin/reports',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminProcessesRoute =
+  AuthenticatedAdminProcessesRouteImport.update({
+    id: '/admin/processes',
+    path: '/admin/processes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminPermissionsRoute =
+  AuthenticatedAdminPermissionsRouteImport.update({
+    id: '/admin/permissions',
+    path: '/admin/permissions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminFrameworksRoute =
+  AuthenticatedAdminFrameworksRouteImport.update({
+    id: '/admin/frameworks',
+    path: '/admin/frameworks',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminExpertsRoute =
+  AuthenticatedAdminExpertsRouteImport.update({
+    id: '/admin/experts',
+    path: '/admin/experts',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminCoachesRoute =
+  AuthenticatedAdminCoachesRouteImport.update({
+    id: '/admin/coaches',
+    path: '/admin/coaches',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminChallengesRoute =
+  AuthenticatedAdminChallengesRouteImport.update({
+    id: '/admin/challenges',
+    path: '/admin/challenges',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminAuditsRoute =
+  AuthenticatedAdminAuditsRouteImport.update({
+    id: '/admin/audits',
+    path: '/admin/audits',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/admin/analytics',
+    path: '/admin/analytics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/achievements': typeof AuthenticatedAchievementsRoute
+  '/assigned-audits': typeof AuthenticatedAssignedAuditsRoute
+  '/audit-history': typeof AuthenticatedAuditHistoryRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/my-audits': typeof AuthenticatedMyAuditsRoute
+  '/my-performance': typeof AuthenticatedMyPerformanceRoute
+  '/my-ratings': typeof AuthenticatedMyRatingsRoute
+  '/my-success-stories': typeof AuthenticatedMySuccessStoriesRoute
+  '/my-testimonials': typeof AuthenticatedMyTestimonialsRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/audits': typeof AuthenticatedAdminAuditsRoute
+  '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
+  '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
+  '/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/admin/frameworks': typeof AuthenticatedAdminFrameworksRoute
+  '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
+  '/admin/processes': typeof AuthenticatedAdminProcessesRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/achievements': typeof AuthenticatedAchievementsRoute
+  '/assigned-audits': typeof AuthenticatedAssignedAuditsRoute
+  '/audit-history': typeof AuthenticatedAuditHistoryRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/my-audits': typeof AuthenticatedMyAuditsRoute
+  '/my-performance': typeof AuthenticatedMyPerformanceRoute
+  '/my-ratings': typeof AuthenticatedMyRatingsRoute
+  '/my-success-stories': typeof AuthenticatedMySuccessStoriesRoute
+  '/my-testimonials': typeof AuthenticatedMyTestimonialsRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/audits': typeof AuthenticatedAdminAuditsRoute
+  '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
+  '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
+  '/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/admin/frameworks': typeof AuthenticatedAdminFrameworksRoute
+  '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
+  '/admin/processes': typeof AuthenticatedAdminProcessesRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/achievements': typeof AuthenticatedAchievementsRoute
+  '/_authenticated/assigned-audits': typeof AuthenticatedAssignedAuditsRoute
+  '/_authenticated/audit-history': typeof AuthenticatedAuditHistoryRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/my-audits': typeof AuthenticatedMyAuditsRoute
+  '/_authenticated/my-performance': typeof AuthenticatedMyPerformanceRoute
+  '/_authenticated/my-ratings': typeof AuthenticatedMyRatingsRoute
+  '/_authenticated/my-success-stories': typeof AuthenticatedMySuccessStoriesRoute
+  '/_authenticated/my-testimonials': typeof AuthenticatedMyTestimonialsRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/audits': typeof AuthenticatedAdminAuditsRoute
+  '/_authenticated/admin/challenges': typeof AuthenticatedAdminChallengesRoute
+  '/_authenticated/admin/coaches': typeof AuthenticatedAdminCoachesRoute
+  '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
+  '/_authenticated/admin/frameworks': typeof AuthenticatedAdminFrameworksRoute
+  '/_authenticated/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
+  '/_authenticated/admin/processes': typeof AuthenticatedAdminProcessesRoute
+  '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
+  '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/forgot-password'
+    | '/reset-password'
+    | '/achievements'
+    | '/assigned-audits'
+    | '/audit-history'
+    | '/dashboard'
+    | '/my-audits'
+    | '/my-performance'
+    | '/my-ratings'
+    | '/my-success-stories'
+    | '/my-testimonials'
+    | '/notifications'
+    | '/profile'
+    | '/reports'
+    | '/admin/analytics'
+    | '/admin/audits'
+    | '/admin/challenges'
+    | '/admin/coaches'
+    | '/admin/experts'
+    | '/admin/frameworks'
+    | '/admin/permissions'
+    | '/admin/processes'
+    | '/admin/reports'
+    | '/admin/roles'
+    | '/admin/settings'
+    | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/forgot-password'
+    | '/reset-password'
+    | '/achievements'
+    | '/assigned-audits'
+    | '/audit-history'
+    | '/dashboard'
+    | '/my-audits'
+    | '/my-performance'
+    | '/my-ratings'
+    | '/my-success-stories'
+    | '/my-testimonials'
+    | '/notifications'
+    | '/profile'
+    | '/reports'
+    | '/admin/analytics'
+    | '/admin/audits'
+    | '/admin/challenges'
+    | '/admin/coaches'
+    | '/admin/experts'
+    | '/admin/frameworks'
+    | '/admin/permissions'
+    | '/admin/processes'
+    | '/admin/reports'
+    | '/admin/roles'
+    | '/admin/settings'
+    | '/admin/users'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/forgot-password'
+    | '/reset-password'
+    | '/_authenticated/achievements'
+    | '/_authenticated/assigned-audits'
+    | '/_authenticated/audit-history'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/my-audits'
+    | '/_authenticated/my-performance'
+    | '/_authenticated/my-ratings'
+    | '/_authenticated/my-success-stories'
+    | '/_authenticated/my-testimonials'
+    | '/_authenticated/notifications'
+    | '/_authenticated/profile'
+    | '/_authenticated/reports'
+    | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/audits'
+    | '/_authenticated/admin/challenges'
+    | '/_authenticated/admin/coaches'
+    | '/_authenticated/admin/experts'
+    | '/_authenticated/admin/frameworks'
+    | '/_authenticated/admin/permissions'
+    | '/_authenticated/admin/processes'
+    | '/_authenticated/admin/reports'
+    | '/_authenticated/admin/roles'
+    | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +432,241 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-testimonials': {
+      id: '/_authenticated/my-testimonials'
+      path: '/my-testimonials'
+      fullPath: '/my-testimonials'
+      preLoaderRoute: typeof AuthenticatedMyTestimonialsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-success-stories': {
+      id: '/_authenticated/my-success-stories'
+      path: '/my-success-stories'
+      fullPath: '/my-success-stories'
+      preLoaderRoute: typeof AuthenticatedMySuccessStoriesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-ratings': {
+      id: '/_authenticated/my-ratings'
+      path: '/my-ratings'
+      fullPath: '/my-ratings'
+      preLoaderRoute: typeof AuthenticatedMyRatingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-performance': {
+      id: '/_authenticated/my-performance'
+      path: '/my-performance'
+      fullPath: '/my-performance'
+      preLoaderRoute: typeof AuthenticatedMyPerformanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/my-audits': {
+      id: '/_authenticated/my-audits'
+      path: '/my-audits'
+      fullPath: '/my-audits'
+      preLoaderRoute: typeof AuthenticatedMyAuditsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/audit-history': {
+      id: '/_authenticated/audit-history'
+      path: '/audit-history'
+      fullPath: '/audit-history'
+      preLoaderRoute: typeof AuthenticatedAuditHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/assigned-audits': {
+      id: '/_authenticated/assigned-audits'
+      path: '/assigned-audits'
+      fullPath: '/assigned-audits'
+      preLoaderRoute: typeof AuthenticatedAssignedAuditsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/achievements': {
+      id: '/_authenticated/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AuthenticatedAchievementsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/roles': {
+      id: '/_authenticated/admin/roles'
+      path: '/admin/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AuthenticatedAdminRolesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/reports': {
+      id: '/_authenticated/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/processes': {
+      id: '/_authenticated/admin/processes'
+      path: '/admin/processes'
+      fullPath: '/admin/processes'
+      preLoaderRoute: typeof AuthenticatedAdminProcessesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/permissions': {
+      id: '/_authenticated/admin/permissions'
+      path: '/admin/permissions'
+      fullPath: '/admin/permissions'
+      preLoaderRoute: typeof AuthenticatedAdminPermissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/frameworks': {
+      id: '/_authenticated/admin/frameworks'
+      path: '/admin/frameworks'
+      fullPath: '/admin/frameworks'
+      preLoaderRoute: typeof AuthenticatedAdminFrameworksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/experts': {
+      id: '/_authenticated/admin/experts'
+      path: '/admin/experts'
+      fullPath: '/admin/experts'
+      preLoaderRoute: typeof AuthenticatedAdminExpertsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/coaches': {
+      id: '/_authenticated/admin/coaches'
+      path: '/admin/coaches'
+      fullPath: '/admin/coaches'
+      preLoaderRoute: typeof AuthenticatedAdminCoachesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/challenges': {
+      id: '/_authenticated/admin/challenges'
+      path: '/admin/challenges'
+      fullPath: '/admin/challenges'
+      preLoaderRoute: typeof AuthenticatedAdminChallengesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/audits': {
+      id: '/_authenticated/admin/audits'
+      path: '/admin/audits'
+      fullPath: '/admin/audits'
+      preLoaderRoute: typeof AuthenticatedAdminAuditsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAchievementsRoute: typeof AuthenticatedAchievementsRoute
+  AuthenticatedAssignedAuditsRoute: typeof AuthenticatedAssignedAuditsRoute
+  AuthenticatedAuditHistoryRoute: typeof AuthenticatedAuditHistoryRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMyAuditsRoute: typeof AuthenticatedMyAuditsRoute
+  AuthenticatedMyPerformanceRoute: typeof AuthenticatedMyPerformanceRoute
+  AuthenticatedMyRatingsRoute: typeof AuthenticatedMyRatingsRoute
+  AuthenticatedMySuccessStoriesRoute: typeof AuthenticatedMySuccessStoriesRoute
+  AuthenticatedMyTestimonialsRoute: typeof AuthenticatedMyTestimonialsRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminAuditsRoute: typeof AuthenticatedAdminAuditsRoute
+  AuthenticatedAdminChallengesRoute: typeof AuthenticatedAdminChallengesRoute
+  AuthenticatedAdminCoachesRoute: typeof AuthenticatedAdminCoachesRoute
+  AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
+  AuthenticatedAdminFrameworksRoute: typeof AuthenticatedAdminFrameworksRoute
+  AuthenticatedAdminPermissionsRoute: typeof AuthenticatedAdminPermissionsRoute
+  AuthenticatedAdminProcessesRoute: typeof AuthenticatedAdminProcessesRoute
+  AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
+  AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAchievementsRoute: AuthenticatedAchievementsRoute,
+  AuthenticatedAssignedAuditsRoute: AuthenticatedAssignedAuditsRoute,
+  AuthenticatedAuditHistoryRoute: AuthenticatedAuditHistoryRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMyAuditsRoute: AuthenticatedMyAuditsRoute,
+  AuthenticatedMyPerformanceRoute: AuthenticatedMyPerformanceRoute,
+  AuthenticatedMyRatingsRoute: AuthenticatedMyRatingsRoute,
+  AuthenticatedMySuccessStoriesRoute: AuthenticatedMySuccessStoriesRoute,
+  AuthenticatedMyTestimonialsRoute: AuthenticatedMyTestimonialsRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminAuditsRoute: AuthenticatedAdminAuditsRoute,
+  AuthenticatedAdminChallengesRoute: AuthenticatedAdminChallengesRoute,
+  AuthenticatedAdminCoachesRoute: AuthenticatedAdminCoachesRoute,
+  AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
+  AuthenticatedAdminFrameworksRoute: AuthenticatedAdminFrameworksRoute,
+  AuthenticatedAdminPermissionsRoute: AuthenticatedAdminPermissionsRoute,
+  AuthenticatedAdminProcessesRoute: AuthenticatedAdminProcessesRoute,
+  AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
+  AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
+  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
