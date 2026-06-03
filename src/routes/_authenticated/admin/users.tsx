@@ -71,7 +71,7 @@ function Users() {
                     <SelectContent>
                       <SelectItem value="super_admin">Super Admin</SelectItem>
                       <SelectItem value="admin">Quality Manager</SelectItem>
-                      <SelectItem value="expert">Auditor</SelectItem>
+                      <SelectItem value="expert">Expert</SelectItem>
                       <SelectItem value="coach">Coach</SelectItem>
                     </SelectContent>
                   </Select>
