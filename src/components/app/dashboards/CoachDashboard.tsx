@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { MeData } from "@/lib/qip/auth";
 import { PageHeader } from "../AppShell";
-void PageHeader;
 import { Trophy, Star, ClipboardCheck, MessageSquare, Sparkles, TrendingUp, Shield, ArrowUp, ChevronRight, Medal, Award, type LucideIcon } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, AreaChart, Area, CartesianGrid } from "recharts";
 import { Link } from "@tanstack/react-router";
