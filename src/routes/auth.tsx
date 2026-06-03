@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Activity, Loader2 } from "lucide-react";
+import { Activity, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/lib/qip/auth";
 import { Button } from "@/components/ui/button";
@@ -79,8 +79,51 @@ function AuthPage() {
               <SignUpForm />
             </TabsContent>
           </Tabs>
+          <DemoBootstrap />
         </div>
       </section>
+    </div>
+  );
+}
+
+function DemoBootstrap() {
+  const [busy, setBusy] = useState(false);
+  const [creds, setCreds] = useState<Array<{ label: string; email: string; password: string }> | null>(null);
+  const onClick = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/public/bootstrap-demo", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Failed");
+      toast.success("Demo data loaded — sign in below");
+      if (Array.isArray(json.credentials)) setCreds(json.credentials);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/20 p-4 text-xs">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="font-semibold text-foreground">First time?</div>
+          <p className="mt-1 text-muted-foreground">Load demo data and four sample login accounts (one per role). Only works if no Super Admin exists yet.</p>
+        </div>
+        <Button size="sm" variant="outline" disabled={busy} onClick={onClick}>
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><Sparkles className="mr-1 h-3.5 w-3.5" /> Load demo</>}
+        </Button>
+      </div>
+      {creds && (
+        <div className="mt-3 space-y-1 border-t border-border pt-3 font-mono">
+          {creds.map((c) => (
+            <div key={c.email} className="flex justify-between gap-2">
+              <span className="text-muted-foreground">{c.label}:</span>
+              <span>{c.email} · {c.password}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
