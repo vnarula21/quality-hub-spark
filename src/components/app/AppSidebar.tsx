@@ -42,7 +42,7 @@ const NAV: Record<AppRole, { label: string; items: Item[] }[]> = {
       label: "Audits",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-        { title: "Assigned Audits", url: "/assigned-audits", icon: ClipboardList },
+        { title: "Audit", url: "/assigned-audits", icon: ClipboardList },
         { title: "Audit History", url: "/audit-history", icon: History },
         { title: "Reports", url: "/reports", icon: BarChart3 },
       ],
