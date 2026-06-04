@@ -29,7 +29,7 @@ async function callAsr(file: Blob, filename: string, opts: { language?: string; 
   return (await res.json()) as TranscribeResult;
 }
 
-export const transcribeUpload = createServerFn({ method: "POST", response: "data" })
+export const transcribeUpload = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => {
     if (!(input instanceof FormData)) throw new Error("Expected FormData");
     const file = input.get("file");
