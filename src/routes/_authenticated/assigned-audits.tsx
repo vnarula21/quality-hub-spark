@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, MessageSquare, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -95,7 +96,28 @@ function CallAuditPanel() {
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-2">
           <Label htmlFor="lang">Language (optional)</Label>
-          <Input id="lang" className="w-36" placeholder="auto" value={language} onChange={(e) => setLanguage(e.target.value)} />
+          <Select value={language || "auto"} onValueChange={(v) => setLanguage(v === "auto" ? "" : v)}>
+            <SelectTrigger id="lang" className="w-40"><SelectValue placeholder="Auto-detect" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Auto-detect</SelectItem>
+              <SelectItem value="en">English (en)</SelectItem>
+              <SelectItem value="hi">Hindi (hi)</SelectItem>
+              <SelectItem value="bn">Bengali (bn)</SelectItem>
+              <SelectItem value="ta">Tamil (ta)</SelectItem>
+              <SelectItem value="te">Telugu (te)</SelectItem>
+              <SelectItem value="mr">Marathi (mr)</SelectItem>
+              <SelectItem value="gu">Gujarati (gu)</SelectItem>
+              <SelectItem value="kn">Kannada (kn)</SelectItem>
+              <SelectItem value="ml">Malayalam (ml)</SelectItem>
+              <SelectItem value="pa">Punjabi (pa)</SelectItem>
+              <SelectItem value="ur">Urdu (ur)</SelectItem>
+              <SelectItem value="es">Spanish (es)</SelectItem>
+              <SelectItem value="fr">French (fr)</SelectItem>
+              <SelectItem value="de">German (de)</SelectItem>
+              <SelectItem value="ar">Arabic (ar)</SelectItem>
+              <SelectItem value="zh">Chinese (zh)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button onClick={handleTranscribe} disabled={loading}>
           {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Transcribing…</> : <><Upload className="mr-2 h-4 w-4" />Transcribe</>}
