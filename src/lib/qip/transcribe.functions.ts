@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const ASR_BASE = "https://asr-api-705962693516.asia-south1.run.app";
 
@@ -74,4 +75,43 @@ export const transcribeUrl = createServerFn({ method: "POST" })
     const name = data.url.split("/").pop()?.split("?")[0] || "audio";
     const blob = new Blob([buf], { type: ct });
     return callAsr(blob, name, { language: data.language, task: data.task });
+  });
+
+export const saveTranscript = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => {
+    const o = input as any;
+    if (!o || typeof o.transcript !== "string" || o.transcript.length === 0) throw new Error("Transcript is required");
+    if (o.transcript.length > 200000) throw new Error("Transcript too large");
+    if (o.source_type !== "url" && o.source_type !== "upload") throw new Error("Invalid source_type");
+    return {
+      transcript: o.transcript as string,
+      language: typeof o.language === "string" ? o.language : null,
+      duration_seconds: typeof o.duration === "number" ? o.duration : null,
+      segments: o.segments ?? null,
+      raw: o.raw ?? null,
+      source_type: o.source_type as "url" | "upload",
+      source_url: typeof o.source_url === "string" ? o.source_url : null,
+      file_name: typeof o.file_name === "string" ? o.file_name : null,
+    };
+  })
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("call_transcripts")
+      .insert({
+        created_by: userId,
+        transcript: data.transcript,
+        language: data.language,
+        duration_seconds: data.duration_seconds,
+        segments: data.segments,
+        raw: data.raw,
+        source_type: data.source_type,
+        source_url: data.source_url,
+        file_name: data.file_name,
+      })
+      .select("id, expires_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id as string, expires_at: row.expires_at as string };
   });
