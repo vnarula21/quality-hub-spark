@@ -302,6 +302,60 @@ export type Database = {
           },
         ]
       }
+      call_transcripts: {
+        Row: {
+          audit_id: string | null
+          coach_id: string | null
+          created_at: string
+          created_by: string
+          duration_seconds: number | null
+          expires_at: string
+          file_name: string | null
+          id: string
+          language: string | null
+          raw: Json | null
+          segments: Json | null
+          source_type: string
+          source_url: string | null
+          transcript: string
+          updated_at: string
+        }
+        Insert: {
+          audit_id?: string | null
+          coach_id?: string | null
+          created_at?: string
+          created_by?: string
+          duration_seconds?: number | null
+          expires_at?: string
+          file_name?: string | null
+          id?: string
+          language?: string | null
+          raw?: Json | null
+          segments?: Json | null
+          source_type: string
+          source_url?: string | null
+          transcript: string
+          updated_at?: string
+        }
+        Update: {
+          audit_id?: string | null
+          coach_id?: string | null
+          created_at?: string
+          created_by?: string
+          duration_seconds?: number | null
+          expires_at?: string
+          file_name?: string | null
+          id?: string
+          language?: string | null
+          raw?: Json | null
+          segments?: Json | null
+          source_type?: string
+          source_url?: string | null
+          transcript?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           audit_id: string
@@ -851,6 +905,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      purge_expired_call_transcripts: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "expert" | "coach"
