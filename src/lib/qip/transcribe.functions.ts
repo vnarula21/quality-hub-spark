@@ -26,7 +26,23 @@ async function callAsr(file: Blob, filename: string, opts: { language?: string; 
     const body = await res.text().catch(() => "");
     throw new Error(`Transcription failed (${res.status}): ${body.slice(0, 300)}`);
   }
-  return (await res.json()) as TranscribeResult;
+  const json: any = await res.json();
+  console.log("ASR raw response keys:", Object.keys(json ?? {}));
+  const text =
+    json?.text ??
+    json?.transcript ??
+    json?.transcription ??
+    (Array.isArray(json?.segments) ? json.segments.map((s: any) => s?.text ?? "").join(" ").trim() : "") ??
+    "";
+  return {
+    text: typeof text === "string" ? text : String(text ?? ""),
+    language: json?.language ?? json?.detected_language,
+    language_probability: json?.language_probability ?? json?.language_confidence,
+    duration: json?.duration ?? json?.audio_duration,
+    segments: json?.segments,
+    // @ts-expect-error keep raw for debugging
+    _raw: json,
+  };
 }
 
 export const transcribeUpload = createServerFn({ method: "POST" })
