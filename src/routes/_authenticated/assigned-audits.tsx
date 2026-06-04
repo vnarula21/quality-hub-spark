@@ -63,9 +63,11 @@ function CallAuditPanel() {
       } else {
         res = await runUrl({ data: { url: url.trim(), language: language || undefined } });
       }
+      console.log("transcribe result", res);
       setResult(res);
       toast.success("Transcription complete");
     } catch (e: any) {
+      console.error("transcribe error", e);
       toast.error(e?.message ?? "Transcription failed");
     } finally {
       setLoading(false);
@@ -100,11 +102,19 @@ function CallAuditPanel() {
         </Button>
       </div>
       {result && (
-        <div className="rounded-lg border bg-secondary/30 p-4">
-          <div className="mb-2 text-xs text-muted-foreground">
-            Detected: {result.language ?? "—"}{result.duration ? ` • ${result.duration.toFixed(1)}s` : ""}
+        <div className="rounded-lg border bg-secondary/30 p-4 space-y-3">
+          <div className="text-xs text-muted-foreground">
+            Detected: {result.language ?? "—"}{typeof result.duration === "number" ? ` • ${result.duration.toFixed(1)}s` : ""}
           </div>
-          <div className="whitespace-pre-wrap text-sm leading-relaxed">{result.text}</div>
+          {result.text && result.text.trim().length > 0 ? (
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">{result.text}</div>
+          ) : (
+            <div className="text-sm italic text-muted-foreground">Empty transcript returned by the API.</div>
+          )}
+          <details className="text-xs">
+            <summary className="cursor-pointer text-muted-foreground">Show raw response</summary>
+            <pre className="mt-2 overflow-auto rounded bg-background p-2 text-[11px]">{JSON.stringify(result, null, 2)}</pre>
+          </details>
         </div>
       )}
     </div>
