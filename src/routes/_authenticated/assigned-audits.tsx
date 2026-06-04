@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Phone, MessageSquare, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { transcribeUpload, transcribeUrl } from "@/lib/qip/transcribe.functions";
+import { transcribeUpload, transcribeUrl, saveTranscript } from "@/lib/qip/transcribe.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/assigned-audits")({ component: AssignedAudits });
@@ -41,11 +41,16 @@ function AssignedAudits() {
 function CallAuditPanel() {
   const runUpload = useServerFn(transcribeUpload);
   const runUrl = useServerFn(transcribeUrl);
+  const runSave = useServerFn(saveTranscript);
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
   const [language, setLanguage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ text: string; language?: string; duration?: number } | null>(null);
+  const [result, setResult] = useState<any | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [savedExpiresAt, setSavedExpiresAt] = useState<string | null>(null);
+  const [lastSource, setLastSource] = useState<{ type: "url" | "upload"; url?: string; file_name?: string } | null>(null);
 
   async function handleTranscribe() {
     if (!file && !url.trim()) {
@@ -54,6 +59,8 @@ function CallAuditPanel() {
     }
     setLoading(true);
     setResult(null);
+      setSavedId(null);
+      setSavedExpiresAt(null);
     try {
       let res;
       if (file) {
@@ -61,8 +68,10 @@ function CallAuditPanel() {
         fd.append("file", file);
         if (language) fd.append("language", language);
         res = await runUpload({ data: fd });
+          setLastSource({ type: "upload", file_name: file.name });
       } else {
         res = await runUrl({ data: { url: url.trim(), language: language || undefined } });
+          setLastSource({ type: "url", url: url.trim() });
       }
       console.log("transcribe result", res);
       setResult(res);
@@ -72,6 +81,33 @@ function CallAuditPanel() {
       toast.error(e?.message ?? "Transcription failed");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleSave() {
+    if (!result?.text || !lastSource) return;
+    setSaving(true);
+    try {
+      const saved = await runSave({
+        data: {
+          transcript: result.text,
+          language: result.language ?? null,
+          duration: typeof result.duration === "number" ? result.duration : null,
+          segments: result.segments ?? null,
+          raw: result._raw ?? null,
+          source_type: lastSource.type,
+          source_url: lastSource.url ?? null,
+          file_name: lastSource.file_name ?? null,
+        },
+      });
+      setSavedId(saved.id);
+      setSavedExpiresAt(saved.expires_at);
+      toast.success(`Saved — expires ${new Date(saved.expires_at).toLocaleDateString()}`);
+    } catch (e: any) {
+      console.error("save transcript error", e);
+      toast.error(e?.message ?? "Could not save transcript");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -133,10 +169,16 @@ function CallAuditPanel() {
           ) : (
             <div className="text-sm italic text-muted-foreground">Empty transcript returned by the API.</div>
           )}
-          <details className="text-xs">
-            <summary className="cursor-pointer text-muted-foreground">Show raw response</summary>
-            <pre className="mt-2 overflow-auto rounded bg-background p-2 text-[11px]">{JSON.stringify(result, null, 2)}</pre>
-          </details>
+          {result.text && result.text.trim().length > 0 && (
+            <div className="flex items-center gap-3 pt-1">
+              <Button onClick={handleSave} disabled={saving || !!savedId} size="sm">
+                {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : savedId ? "Saved" : "Save transcript"}
+              </Button>
+              {savedExpiresAt && (
+                <span className="text-[11px] text-muted-foreground">Auto-deletes on {new Date(savedExpiresAt).toLocaleDateString()}</span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
