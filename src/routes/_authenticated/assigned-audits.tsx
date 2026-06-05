@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, MessageSquare, Loader2, Upload } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { transcribeUpload, transcribeUrl, saveTranscript } from "@/lib/qip/transcribe.functions";
 import { toast } from "sonner";
@@ -51,6 +51,9 @@ function CallAuditPanel() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [savedExpiresAt, setSavedExpiresAt] = useState<string | null>(null);
   const [lastSource, setLastSource] = useState<{ type: "url" | "upload"; url?: string; file_name?: string } | null>(null);
+  const [swapSpeakers, setSwapSpeakers] = useState(false);
+
+  const turns = useMemo(() => groupSegmentsBySpeaker(result?.segments), [result?.segments]);
 
   async function handleTranscribe() {
     if (!file && !url.trim()) {
@@ -165,7 +168,35 @@ function CallAuditPanel() {
             Detected: {result.language ?? "—"}{typeof result.duration === "number" ? ` • ${result.duration.toFixed(1)}s` : ""}
           </div>
           {result.text && result.text.trim().length > 0 ? (
-            <div className="whitespace-pre-wrap text-sm leading-relaxed">{result.text}</div>
+            turns.length >= 2 ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] text-muted-foreground">
+                    Speakers inferred from pauses (not true diarization). Use Swap if labels are reversed.
+                  </p>
+                  <Button variant="ghost" size="sm" onClick={() => setSwapSpeakers((s) => !s)}>
+                    Swap Coach / Player
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {turns.map((t, i) => {
+                    const isCoach = swapSpeakers ? t.speaker === 1 : t.speaker === 0;
+                    return (
+                      <div key={i} className={`flex ${isCoach ? "justify-start" : "justify-end"}`}>
+                        <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${isCoach ? "bg-background border" : "bg-primary/10 border border-primary/20"}`}>
+                          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                            {isCoach ? "Coach" : "Player"} • {formatTime(t.start)}
+                          </div>
+                          <div className="whitespace-pre-wrap leading-relaxed">{t.text}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="whitespace-pre-wrap text-sm leading-relaxed">{result.text}</div>
+            )
           ) : (
             <div className="text-sm italic text-muted-foreground">Empty transcript returned by the API.</div>
           )}
@@ -183,6 +214,42 @@ function CallAuditPanel() {
       )}
     </div>
   );
+}
+
+function formatTime(sec: number) {
+  const s = Math.max(0, Math.floor(sec));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${r.toString().padStart(2, "0")}`;
+}
+
+// Pause-based speaker grouping. Flips speaker when the gap between consecutive
+// segments exceeds the threshold. Rough heuristic; real diarization requires AssemblyAI/pyannote.
+function groupSegmentsBySpeaker(
+  segments: Array<{ start: number; end: number; text: string }> | undefined,
+  gapThresholdSec = 1.0,
+): Array<{ speaker: 0 | 1; start: number; end: number; text: string }> {
+  if (!Array.isArray(segments) || segments.length === 0) return [];
+  const turns: Array<{ speaker: 0 | 1; start: number; end: number; text: string }> = [];
+  let speaker: 0 | 1 = 0;
+  let prevEnd = -Infinity;
+  for (const seg of segments) {
+    const text = (seg.text ?? "").trim();
+    if (!text) continue;
+    const gap = seg.start - prevEnd;
+    if (gap > gapThresholdSec && turns.length > 0) {
+      speaker = speaker === 0 ? 1 : 0;
+    }
+    const last = turns[turns.length - 1];
+    if (last && last.speaker === speaker) {
+      last.text += " " + text;
+      last.end = seg.end;
+    } else {
+      turns.push({ speaker, start: seg.start, end: seg.end, text });
+    }
+    prevEnd = seg.end;
+  }
+  return turns;
 }
 
 function ChatAuditPanel() {
