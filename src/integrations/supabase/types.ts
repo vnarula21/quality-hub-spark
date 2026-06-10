@@ -93,33 +93,42 @@ export type Database = {
       audit_frameworks: {
         Row: {
           created_at: string
+          criteria: Json
           description: string | null
           id: string
           is_active: boolean
+          kind: string | null
           name: string
           process_id: string | null
           total_max_score: number
           updated_at: string
+          zero_tolerance: string | null
         }
         Insert: {
           created_at?: string
+          criteria?: Json
           description?: string | null
           id?: string
           is_active?: boolean
+          kind?: string | null
           name: string
           process_id?: string | null
           total_max_score?: number
           updated_at?: string
+          zero_tolerance?: string | null
         }
         Update: {
           created_at?: string
+          criteria?: Json
           description?: string | null
           id?: string
           is_active?: boolean
+          kind?: string | null
           name?: string
           process_id?: string | null
           total_max_score?: number
           updated_at?: string
+          zero_tolerance?: string | null
         }
         Relationships: [
           {
@@ -137,8 +146,12 @@ export type Database = {
           comments: string | null
           created_at: string
           criterion: string
+          criterion_no: number | null
+          evidence_quote: string | null
+          expert_note: string | null
           id: string
           max_score: number
+          reasoning: string | null
           score: number
           updated_at: string
           weight: number | null
@@ -148,8 +161,12 @@ export type Database = {
           comments?: string | null
           created_at?: string
           criterion: string
+          criterion_no?: number | null
+          evidence_quote?: string | null
+          expert_note?: string | null
           id?: string
           max_score?: number
+          reasoning?: string | null
           score?: number
           updated_at?: string
           weight?: number | null
@@ -159,8 +176,12 @@ export type Database = {
           comments?: string | null
           created_at?: string
           criterion?: string
+          criterion_no?: number | null
+          evidence_quote?: string | null
+          expert_note?: string | null
           id?: string
           max_score?: number
+          reasoning?: string | null
           score?: number
           updated_at?: string
           weight?: number | null
@@ -216,62 +237,93 @@ export type Database = {
       audits: {
         Row: {
           accepted_by_coach: boolean | null
+          ai_result: Json | null
+          call_transcript_id: string | null
+          challenge_count: number
           coach_id: string
           conducted_at: string | null
           created_at: string
           created_by: string | null
+          edited_by_expert: boolean
           expert_id: string | null
           framework_id: string | null
+          guidance: string | null
           id: string
+          locked: boolean
           max_score: number | null
           process_id: string | null
           published_at: string | null
           rag: Database["public"]["Enums"]["rag_status"] | null
+          re_edit_allowed: boolean
           scheduled_at: string | null
           status: Database["public"]["Enums"]["audit_status"]
           title: string
           total_score: number | null
           updated_at: string
+          zero_tolerance_hit: boolean
         }
         Insert: {
           accepted_by_coach?: boolean | null
+          ai_result?: Json | null
+          call_transcript_id?: string | null
+          challenge_count?: number
           coach_id: string
           conducted_at?: string | null
           created_at?: string
           created_by?: string | null
+          edited_by_expert?: boolean
           expert_id?: string | null
           framework_id?: string | null
+          guidance?: string | null
           id?: string
+          locked?: boolean
           max_score?: number | null
           process_id?: string | null
           published_at?: string | null
           rag?: Database["public"]["Enums"]["rag_status"] | null
+          re_edit_allowed?: boolean
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           title: string
           total_score?: number | null
           updated_at?: string
+          zero_tolerance_hit?: boolean
         }
         Update: {
           accepted_by_coach?: boolean | null
+          ai_result?: Json | null
+          call_transcript_id?: string | null
+          challenge_count?: number
           coach_id?: string
           conducted_at?: string | null
           created_at?: string
           created_by?: string | null
+          edited_by_expert?: boolean
           expert_id?: string | null
           framework_id?: string | null
+          guidance?: string | null
           id?: string
+          locked?: boolean
           max_score?: number | null
           process_id?: string | null
           published_at?: string | null
           rag?: Database["public"]["Enums"]["rag_status"] | null
+          re_edit_allowed?: boolean
           scheduled_at?: string | null
           status?: Database["public"]["Enums"]["audit_status"]
           title?: string
           total_score?: number | null
           updated_at?: string
+          zero_tolerance_hit?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "audits_call_transcript_id_fkey"
+            columns: ["call_transcript_id"]
+            isOneToOne: false
+            referencedRelation: "call_transcripts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "audits_coach_id_fkey"
             columns: ["coach_id"]
