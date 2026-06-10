@@ -215,14 +215,7 @@ function CallAuditPanel() {
   );
 }
 
-function formatTime(sec: number) {
-  const s = Math.max(0, Math.floor(sec));
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}:${r.toString().padStart(2, "0")}`;
-}
 
-function _formatTimeUnused(sec: number) { return sec; }
 
 function ChatAuditPanel() {
   const { data: me } = useMe();
