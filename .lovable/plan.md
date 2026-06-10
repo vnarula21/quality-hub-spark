@@ -1,52 +1,48 @@
-## Goal
-Replace the current ASR with your new dialogue-transcription API that returns COACH/PLAYER turns directly, and render them as chat bubbles in the audit screen.
+## API details (confirmed)
+- **Endpoint:** `POST https://apiv6.goqii.com/vertex/recording`
+- **Headers:** `clientId: 5tra1IQYBCog7Wcaqtd7aa7f`, `clientSecret: <secret>`, `Content-Type: application/json`
+- **Body:** `{ "file": "<public mp3 url>", "prompt": "<prompt text>" }`
+- **Prompt to use** (your exact one): `"Transcribe this call in dialogue format. Two speakers: COACH (initiates call, asks questions, gives advice) and PLAYER (answers questions, shares health info). Format: COACH: [text] PLAYER: [text]. Never merge turns. No timestamps or commentary."`
 
-## What I need from you
-1. **API URL** (endpoint to POST to)
-2. **Auth** — secret key name + how it's sent (header name? `Authorization: Bearer ...`? `X-API-Key`?)
-3. **Response shape** — sample JSON (or plain text). I'll adapt the parser to whatever it returns.
-4. **File input mode** — since both are supported, I'll default to **multipart upload** (sends file bytes from our server, no need to host audio publicly). If you'd rather pass the public URL, say so.
-5. **Request body fields** — confirm the exact keys. Your example uses `file` + `prompt`; I'll use those unless the docs say otherwise.
+## Steps
 
-Once you share the docs/sample, I'll store the key as a new secret (e.g. `DIALOGUE_ASR_API_KEY`) and wire it up.
+### 1. Secrets
+- Add `GOQII_CLIENT_SECRET` (you'll paste it into the secure form when prompted).
+- `clientId` is non-sensitive — hardcode it in the server function. (Move to a secret too if you prefer; tell me.)
 
-## Implementation plan
+### 2. Storage bucket for uploads
+Since the API only accepts a public URL, create a **public** Lovable Cloud storage bucket `call-recordings`:
+- Public read (so the API can fetch the file).
+- Authenticated insert (any logged-in user can upload).
+- Files auto-deleted via the existing `purge_expired_call_transcripts` cron pattern — or keep simple and rely on manual cleanup. (I'll just upload; cleanup can come later.)
 
-### 1. Secret
-- Add new secret for the API key via the secrets tool (name confirmed with you, e.g. `DIALOGUE_ASR_API_KEY`).
-- Remove old `ASR_API_KEY` after the swap is verified.
+### 3. Rewrite `src/lib/qip/transcribe.functions.ts`
+- New `callDialogueApi(fileUrl: string)`:
+  - POST to goqii endpoint with the two headers + JSON body.
+  - Log raw response (for debugging the shape).
+  - Extract text from `json.text ?? json.transcript ?? json.data ?? json.result ?? (typeof json === 'string' ? json : '')`.
+  - `parseTurns(text)` — regex `/^\s*(COACH|PLAYER)\s*:\s*/gim` to split into `{ speaker, text }[]`.
+  - Return `{ raw_text, turns, language?, duration? }`.
+- `transcribeUrl({ url })` — pass the URL straight through to the API.
+- `transcribeUpload(formData)` — upload the file to the `call-recordings` bucket via `supabaseAdmin`, get the public URL, then call the API with that URL.
+- `saveTranscript` — extend to also store `turns` in the existing `segments` JSONB column (no DB migration needed).
 
-### 2. Rewrite `src/lib/qip/transcribe.functions.ts`
-- Replace `callAsr` with `callDialogueApi(file, filename)` that:
-  - POSTs to your new endpoint with the auth header.
-  - Body: multipart `file` + `prompt` field set to your exact prompt string:
-    > "Transcribe this call in dialogue format. Two speakers: COACH (initiates call, asks questions, gives advice) and PLAYER (answers questions, shares health info). Format: COACH: [text] PLAYER: [text]. Never merge turns. No timestamps or commentary."
-  - Parses the response into a normalized shape:
-    ```ts
-    type DialogueResult = {
-      raw_text: string;
-      turns: Array<{ speaker: "COACH" | "PLAYER"; text: string }>;
-      language?: string;
-      duration?: number;
-    }
-    ```
-  - Parser: regex-split on `^(COACH|PLAYER):` (case-insensitive, multiline) so even if the API returns one long string, we get clean turns.
-- Keep `transcribeUpload` and `transcribeUrl` signatures so the UI doesn't break — they call the new function instead.
-- Update `saveTranscript` to also accept/persist `turns` (stored in the existing `segments` JSONB column — no migration needed).
+### 4. UI (`src/routes/_authenticated/assigned-audits.tsx`)
+- Remove the `groupSegmentsBySpeaker` pause-based heuristic.
+- Render `result.turns` directly as Coach (left, neutral bubble) / Player (right, primary-tinted bubble).
+- Keep the "Swap Coach / Player" toggle (swaps which side each label sits on).
+- Fallback to paragraph view if `turns.length === 0`.
 
-### 3. Update UI (`src/routes/_authenticated/assigned-audits.tsx`)
-- Remove the pause-based `groupSegmentsBySpeaker` heuristic.
-- Render `result.turns` directly as Coach/Player chat bubbles (left=Coach neutral, right=Player primary-tinted).
-- Keep the existing "Swap Coach / Player" button (flips which label sits on which side).
-- Fallback: if `turns` is empty, show `raw_text` in a paragraph view.
+### 5. Verify
+- Upload a short mp3 in the UI → confirm it lands in `call-recordings`, public URL works, API returns dialogue, bubbles render correctly.
+- Inspect server logs for the raw goqii response to confirm the parser caught the right field. Adjust if needed.
 
-### 4. Verify
-- Run a transcribe via the UI on a sample file.
-- Check server logs for the raw API response, confirm the parser produces clean turns.
-- Remove old `ASR_API_KEY` secret only after success.
+### 6. Cleanup
+- After it works, remove old `ASR_API_KEY` secret.
 
-## Out of scope
-- DB schema changes (reusing `segments` JSONB).
-- AssemblyAI fallback (you chose "Replace entirely").
+## Things I'm assuming (correct me if wrong)
+- Response contains a text field with the formatted `COACH: ... PLAYER: ...` string (we'll log the raw shape to verify on first run).
+- API latency is acceptable for synchronous request (no polling/job queue needed).
+- Public storage bucket is OK for call recordings. **If recordings are sensitive PHI**, we should NOT make them public — in that case the goqii API would need to support signed URLs or direct upload. Let me know.
 
-**Reply with the API docs / sample response and I'll switch to build mode and ship it.**
+**Reply with "go" and I'll switch to build mode, request the secret, and ship.**
