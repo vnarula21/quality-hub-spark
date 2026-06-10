@@ -23,6 +23,15 @@ function AssignedAudits() {
   return (
     <div className="space-y-6">
       <PageHeader title="Audit" description="Run a call or chat audit." />
+      <div className="surface-card p-4 flex items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold">Audit guidance form</div>
+          <div className="text-xs text-muted-foreground">
+            Preview the framework + optional guidance form an expert sees before running an audit.
+          </div>
+        </div>
+        <AuditWithAI defaultKind="call" previewOnly />
+      </div>
       <Tabs defaultValue="call" className="w-full">
         <TabsList>
           <TabsTrigger value="call"><Phone className="mr-2 h-4 w-4" />Call</TabsTrigger>

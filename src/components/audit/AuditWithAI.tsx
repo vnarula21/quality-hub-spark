@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Sparkles, AlertTriangle, Lock, Edit3 } from "lucide-react";
+import { Loader2, Sparkles, AlertTriangle, Lock, Edit3, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { runAudit, saveExpertChallenge, listFrameworks } from "@/lib/qip/audit.functions";
 
@@ -23,7 +23,6 @@ type AIResult = {
   improvements: string[];
   total: number;
   max: number;
-  rag: "red" | "amber" | "green";
 };
 
 export function AuditWithAI({
@@ -31,11 +30,13 @@ export function AuditWithAI({
   turns,
   source,
   defaultKind,
+  previewOnly = false,
 }: {
-  transcript: string;
-  turns: Turn[];
-  source: { type: "url" | "upload"; url?: string; file_name?: string; language?: string | null; duration?: number | null };
+  transcript?: string;
+  turns?: Turn[];
+  source?: { type: "url" | "upload"; url?: string; file_name?: string; language?: string | null; duration?: number | null };
   defaultKind: "call" | "chat";
+  previewOnly?: boolean;
 }) {
   const run = useServerFn(runAudit);
   const save = useServerFn(saveExpertChallenge);
@@ -59,6 +60,10 @@ export function AuditWithAI({
   const [saving, setSaving] = useState(false);
 
   async function handleRun() {
+    if (previewOnly || !transcript || !source) {
+      toast.message("Transcribe a call/chat first, then click Audit with AI from there.");
+      return;
+    }
     const fid = frameworkId || callable[0]?.id;
     if (!fid) {
       toast.error("Select a framework");
@@ -70,7 +75,7 @@ export function AuditWithAI({
         data: {
           framework_id: fid,
           transcript,
-          turns,
+          turns: turns ?? [],
           guidance: guidance.trim() || null,
           source,
         },
@@ -115,7 +120,7 @@ export function AuditWithAI({
           ...p,
           score: edits[p.no]?.score ?? p.score,
         }));
-        setResult({ ...result, parameters: updated, total: r.total, max: r.max, rag: r.rag as any });
+        setResult({ ...result, parameters: updated, total: r.total, max: r.max });
       }
       setEditing(false);
       setLocked(true);
@@ -126,24 +131,28 @@ export function AuditWithAI({
     }
   }
 
-  const ragColor = (r: string) =>
-    r === "green" ? "bg-emerald-500/15 text-emerald-700 border-emerald-500/30"
-    : r === "amber" ? "bg-amber-500/15 text-amber-700 border-amber-500/30"
-    : "bg-rose-500/15 text-rose-700 border-rose-500/30";
-
   return (
     <div className="space-y-4">
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button size="sm" variant="secondary">
-            <Sparkles className="mr-2 h-4 w-4" /> Audit with AI
+            {previewOnly ? (
+              <><Eye className="mr-2 h-4 w-4" /> Preview audit guidance form</>
+            ) : (
+              <><Sparkles className="mr-2 h-4 w-4" /> Audit with AI</>
+            )}
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Run AI audit</DialogTitle>
+            <DialogTitle>{previewOnly ? "Audit guidance form (preview)" : "Run AI audit"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            {previewOnly && (
+              <p className="text-xs text-muted-foreground">
+                This is the form an expert sees before running an audit. Transcribe a call/chat to actually run it.
+              </p>
+            )}
             <div className="space-y-2">
               <Label>Framework</Label>
               <Select value={frameworkId || callable[0]?.id || ""} onValueChange={setFrameworkId}>
@@ -169,9 +178,13 @@ export function AuditWithAI({
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleRun} disabled={running}>
-              {running ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Auditing…</> : <><Sparkles className="mr-2 h-4 w-4" />Run audit</>}
-            </Button>
+            {previewOnly ? (
+              <Button variant="outline" onClick={() => setOpen(false)}>Close preview</Button>
+            ) : (
+              <Button onClick={handleRun} disabled={running}>
+                {running ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Auditing…</> : <><Sparkles className="mr-2 h-4 w-4" />Run audit</>}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -183,7 +196,6 @@ export function AuditWithAI({
               <div className="text-lg font-semibold">
                 Score: {result.total} / {result.max}
               </div>
-              <Badge className={`uppercase border ${ragColor(result.rag)}`}>{result.rag}</Badge>
               {result.zero_tolerance_hit && (
                 <Badge className="border bg-rose-500/15 text-rose-700 border-rose-500/30">
                   <AlertTriangle className="mr-1 h-3 w-3" /> Zero-tolerance hit
