@@ -171,7 +171,7 @@ ${dialogue}
         expert_id: expertId,
         framework_id: fw.id,
         title: `${fw.name} — ${new Date().toISOString().slice(0, 10)}`,
-        status: "completed",
+        status: "pending_review",
         rag,
         total_score: total,
         max_score: max,
