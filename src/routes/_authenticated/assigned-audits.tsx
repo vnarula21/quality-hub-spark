@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { transcribeUpload, transcribeUrl, saveTranscript } from "@/lib/qip/transcribe.functions";
 import { toast } from "sonner";
+import { AuditWithAI } from "@/components/audit/AuditWithAI";
 
 export const Route = createFileRoute("/_authenticated/assigned-audits")({ component: AssignedAudits });
 
@@ -207,6 +208,27 @@ function CallAuditPanel() {
               {savedExpiresAt && (
                 <span className="text-[11px] text-muted-foreground">Auto-deletes on {new Date(savedExpiresAt).toLocaleDateString()}</span>
               )}
+            </div>
+          )}
+          {result.text && result.text.trim().length > 0 && lastSource && (
+            <div className="pt-2 border-t">
+              <AuditWithAI
+                transcript={result.text}
+                turns={
+                  (turns ?? []).map((t) => ({
+                    speaker: (swapSpeakers ? (t.speaker === "COACH" ? "PLAYER" : "COACH") : t.speaker),
+                    text: t.text,
+                  }))
+                }
+                source={{
+                  type: lastSource.type,
+                  url: lastSource.url,
+                  file_name: lastSource.file_name,
+                  language: result.language ?? null,
+                  duration: typeof result.duration === "number" ? result.duration : null,
+                }}
+                defaultKind="call"
+              />
             </div>
           )}
         </div>
