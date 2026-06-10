@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, MessageSquare, Loader2, Upload } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { transcribeUpload, transcribeUrl, saveTranscript } from "@/lib/qip/transcribe.functions";
 import { toast } from "sonner";
@@ -52,8 +52,7 @@ function CallAuditPanel() {
   const [savedExpiresAt, setSavedExpiresAt] = useState<string | null>(null);
   const [lastSource, setLastSource] = useState<{ type: "url" | "upload"; url?: string; file_name?: string } | null>(null);
   const [swapSpeakers, setSwapSpeakers] = useState(false);
-
-  const turns = useMemo(() => groupSegmentsBySpeaker(result?.segments), [result?.segments]);
+  const turns: Array<{ speaker: "COACH" | "PLAYER"; text: string }> = Array.isArray(result?.turns) ? result.turns : [];
 
   async function handleTranscribe() {
     if (!file && !url.trim()) {
@@ -69,11 +68,10 @@ function CallAuditPanel() {
       if (file) {
         const fd = new FormData();
         fd.append("file", file);
-        if (language) fd.append("language", language);
         res = await runUpload({ data: fd });
           setLastSource({ type: "upload", file_name: file.name });
       } else {
-        res = await runUrl({ data: { url: url.trim(), language: language || undefined } });
+        res = await runUrl({ data: { url: url.trim() } });
           setLastSource({ type: "url", url: url.trim() });
       }
       console.log("transcribe result", res);
@@ -96,7 +94,7 @@ function CallAuditPanel() {
           transcript: result.text,
           language: result.language ?? null,
           duration: typeof result.duration === "number" ? result.duration : null,
-          segments: result.segments ?? null,
+          segments: result.turns ?? null,
           raw: result._raw ?? null,
           source_type: lastSource.type,
           source_url: lastSource.url ?? null,
@@ -168,11 +166,11 @@ function CallAuditPanel() {
             Detected: {result.language ?? "—"}{typeof result.duration === "number" ? ` • ${result.duration.toFixed(1)}s` : ""}
           </div>
           {result.text && result.text.trim().length > 0 ? (
-            turns.length >= 2 ? (
+            turns.length >= 1 ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] text-muted-foreground">
-                    Speakers inferred from pauses (not true diarization). Use Swap if labels are reversed.
+                    Speaker-labeled by the transcription API. Use Swap if Coach / Player are reversed.
                   </p>
                   <Button variant="ghost" size="sm" onClick={() => setSwapSpeakers((s) => !s)}>
                     Swap Coach / Player
@@ -180,12 +178,13 @@ function CallAuditPanel() {
                 </div>
                 <div className="space-y-2">
                   {turns.map((t, i) => {
-                    const isCoach = swapSpeakers ? t.speaker === 1 : t.speaker === 0;
+                    const isCoachLabel = t.speaker === "COACH";
+                    const isCoach = swapSpeakers ? !isCoachLabel : isCoachLabel;
                     return (
                       <div key={i} className={`flex ${isCoach ? "justify-start" : "justify-end"}`}>
                         <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${isCoach ? "bg-background border" : "bg-primary/10 border border-primary/20"}`}>
                           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                            {isCoach ? "Coach" : "Player"} • {formatTime(t.start)}
+                            {isCoach ? "Coach" : "Player"}
                           </div>
                           <div className="whitespace-pre-wrap leading-relaxed">{t.text}</div>
                         </div>
