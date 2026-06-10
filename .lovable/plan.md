@@ -1,74 +1,52 @@
 ## Goal
+Replace the current ASR with your new dialogue-transcription API that returns COACH/PLAYER turns directly, and render them as chat bubbles in the audit screen.
 
-Add speaker-labeled transcription (Coach vs Player) to the Call audit panel. Current ASR (faster-whisper on Cloud Run) does not support diarization — its OpenAPI only exposes `file`, `language`, `task`. We add **AssemblyAI** as a second backend behind a toggle, and render the result as a two-speaker conversation.
+## What I need from you
+1. **API URL** (endpoint to POST to)
+2. **Auth** — secret key name + how it's sent (header name? `Authorization: Bearer ...`? `X-API-Key`?)
+3. **Response shape** — sample JSON (or plain text). I'll adapt the parser to whatever it returns.
+4. **File input mode** — since both are supported, I'll default to **multipart upload** (sends file bytes from our server, no need to host audio publicly). If you'd rather pass the public URL, say so.
+5. **Request body fields** — confirm the exact keys. Your example uses `file` + `prompt`; I'll use those unless the docs say otherwise.
 
-## Current state
+Once you share the docs/sample, I'll store the key as a new secret (e.g. `DIALOGUE_ASR_API_KEY`) and wire it up.
 
-- `src/lib/qip/transcribe.functions.ts` calls `https://asr-api-705962693516.asia-south1.run.app/v1/transcribe` with `X-API-Key: ASR_API_KEY`. Returns flat `text` + `segments`. No speaker info.
-- `src/routes/_authenticated/assigned-audits.tsx` renders the transcript as a single paragraph.
-
-## Changes
+## Implementation plan
 
 ### 1. Secret
+- Add new secret for the API key via the secrets tool (name confirmed with you, e.g. `DIALOGUE_ASR_API_KEY`).
+- Remove old `ASR_API_KEY` after the swap is verified.
 
-- Add `ASSEMBLYAI_API_KEY` via `secrets--add_secret` (user enters it once in the secure form).
+### 2. Rewrite `src/lib/qip/transcribe.functions.ts`
+- Replace `callAsr` with `callDialogueApi(file, filename)` that:
+  - POSTs to your new endpoint with the auth header.
+  - Body: multipart `file` + `prompt` field set to your exact prompt string:
+    > "Transcribe this call in dialogue format. Two speakers: COACH (initiates call, asks questions, gives advice) and PLAYER (answers questions, shares health info). Format: COACH: [text] PLAYER: [text]. Never merge turns. No timestamps or commentary."
+  - Parses the response into a normalized shape:
+    ```ts
+    type DialogueResult = {
+      raw_text: string;
+      turns: Array<{ speaker: "COACH" | "PLAYER"; text: string }>;
+      language?: string;
+      duration?: number;
+    }
+    ```
+  - Parser: regex-split on `^(COACH|PLAYER):` (case-insensitive, multiline) so even if the API returns one long string, we get clean turns.
+- Keep `transcribeUpload` and `transcribeUrl` signatures so the UI doesn't break — they call the new function instead.
+- Update `saveTranscript` to also accept/persist `turns` (stored in the existing `segments` JSONB column — no migration needed).
 
-### 2. Server function — `src/lib/qip/transcribe.functions.ts`
+### 3. Update UI (`src/routes/_authenticated/assigned-audits.tsx`)
+- Remove the pause-based `groupSegmentsBySpeaker` heuristic.
+- Render `result.turns` directly as Coach/Player chat bubbles (left=Coach neutral, right=Player primary-tinted).
+- Keep the existing "Swap Coach / Player" button (flips which label sits on which side).
+- Fallback: if `turns` is empty, show `raw_text` in a paragraph view.
 
-Add `transcribeWithSpeakers` (createServerFn, POST). Input: `{ url?, fileBase64?, fileName?, language? }` — or accept FormData like the existing fns (two variants: `transcribeUploadDiarized`, `transcribeUrlDiarized`).
-
-Flow:
-
-1. Resolve audio bytes (upload or fetch URL, reuse the 25 MB cap + content-type logic).
-2. `POST https://api.assemblyai.com/v2/upload` with header `Authorization: <ASSEMBLYAI_API_KEY>` and the raw audio body → returns `{ upload_url }`.
-3. `POST https://api.assemblyai.com/v2/transcript` with `{ audio_url, speaker_labels: true, speakers_expected: 2, language_code? }` → returns `{ id }`.
-4. Poll `GET /v2/transcript/{id}` every 2s (max ~120s) until `status === 'completed'` or `'error'`.
-5. Return DTO:
-  ```ts
-   {
-     text: string,            // full transcript
-     language?: string,
-     duration?: number,       // seconds
-     utterances: Array<{ speaker: "A"|"B"|string, text: string, start: number, end: number }>,
-     segments?: same as before for fallback,
-   }
-  ```
-
-Keep the existing `transcribeUpload` / `transcribeUrl` untouched — fast path for users who don't need speakers.
-
-### 3. UI — `src/routes/_authenticated/assigned-audits.tsx`
-
-- Add a `Switch` labeled **"Identify speakers (Coach/ Player)"** next to the language picker. Default off.
-- When ON, `handleTranscribe` calls the new diarized server fn instead.
-- New render block when `result.utterances` exists: map each utterance to a chat bubble.
-  - Speaker "A" → labeled **Coach**, left-aligned, neutral surface.
-  - Speaker "B" → labeled **Player**, right-aligned, primary-tinted surface.
-  - Any other letter → "Speaker {X}", left-aligned.
-  - Show `mm:ss` timestamp on each bubble.
-  - Add a small "Swap Coach/Player" link (just flips the A↔B label locally) since AssemblyAI assigns letters arbitrarily.
-- If `utterances` is missing (diarization off), keep the existing paragraph view.
-
-### 4. Save flow
-
-- Extend `saveTranscript` input to also accept optional `utterances jsonb`.
-- Add `utterances jsonb null` column to `public.call_transcripts` via a new migration. No RLS / grant changes needed (table-level policies cover it).
-- Persist `utterances` when present so the next step (audit creation) can read the speaker-labeled version.
-
-### 5. Cost / latency notes for the user
-
-- AssemblyAI: ~$0.37/hr of audio. Best speaker accuracy in this price tier. (Let the owner know if Current ASR is not giving the output that owner wants)
-- Round-trip latency: typically 30–90s for a 5-min call (upload + processing + polling).
-- Current ASR stays free for runs where diarization isn't needed.
+### 4. Verify
+- Run a transcribe via the UI on a sample file.
+- Check server logs for the raw API response, confirm the parser produces clean turns.
+- Remove old `ASR_API_KEY` secret only after success.
 
 ## Out of scope
+- DB schema changes (reusing `segments` JSONB).
+- AssemblyAI fallback (you chose "Replace entirely").
 
-- pyannote on your own Cloud Run.
-- Deepgram / ElevenLabs (can swap later — same UI shape).
-- Audit creation linked to `audit_id` (already deferred).
-
-## Files touched
-
-- `src/lib/qip/transcribe.functions.ts` (add 2 fns)
-- `src/routes/_authenticated/assigned-audits.tsx` (toggle + chat-bubble renderer)
-- new migration: `add utterances column to call_transcripts`
-- new secret: `ASSEMBLYAI_API_KEY`
+**Reply with the API docs / sample response and I'll switch to build mode and ship it.**
