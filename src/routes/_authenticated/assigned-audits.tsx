@@ -222,34 +222,7 @@ function formatTime(sec: number) {
   return `${m}:${r.toString().padStart(2, "0")}`;
 }
 
-// Pause-based speaker grouping. Flips speaker when the gap between consecutive
-// segments exceeds the threshold. Rough heuristic; real diarization requires AssemblyAI/pyannote.
-function groupSegmentsBySpeaker(
-  segments: Array<{ start: number; end: number; text: string }> | undefined,
-  gapThresholdSec = 1.0,
-): Array<{ speaker: 0 | 1; start: number; end: number; text: string }> {
-  if (!Array.isArray(segments) || segments.length === 0) return [];
-  const turns: Array<{ speaker: 0 | 1; start: number; end: number; text: string }> = [];
-  let speaker: 0 | 1 = 0;
-  let prevEnd = -Infinity;
-  for (const seg of segments) {
-    const text = (seg.text ?? "").trim();
-    if (!text) continue;
-    const gap = seg.start - prevEnd;
-    if (gap > gapThresholdSec && turns.length > 0) {
-      speaker = speaker === 0 ? 1 : 0;
-    }
-    const last = turns[turns.length - 1];
-    if (last && last.speaker === speaker) {
-      last.text += " " + text;
-      last.end = seg.end;
-    } else {
-      turns.push({ speaker, start: seg.start, end: seg.end, text });
-    }
-    prevEnd = seg.end;
-  }
-  return turns;
-}
+function _formatTimeUnused(sec: number) { return sec; }
 
 function ChatAuditPanel() {
   const { data: me } = useMe();
