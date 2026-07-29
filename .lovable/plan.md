@@ -1,88 +1,50 @@
-## NHS AI Audit — Build Plan
+## Export your Lovable project to use with Claude Code
 
-### Scoring & flow (confirmed)
-- Scoring: **0 = poor, 1 = somewhat done, 2 = done correctly** (per parameter)
-- Audit result **auto-saves** to DB on every run
-- Expert can click **Challenge** → unlocks score edits + per-parameter notes → **Save Audit** (note: "Once saved, cannot be edited again")
-- After save, edits locked. **Coach can challenge** → unlocks a one-time re-edit for the expert
-- Guidance textarea starts blank every time (no remembering)
+Lovable projects can't be opened directly in Claude Code — but you can export the codebase to GitHub (or download it) and then work on it locally with Claude Code. Here's the path:
 
-### Transcript storage
-- Transcript stays in browser React state during the session (not persisted) until audit runs
-- When audit runs and saves, we also persist transcript text on `call_transcripts` (linked to the new audit row), so the saved audit is reviewable later
+### Step 1 — Push your code to GitHub
+In the Lovable editor:
+1. Bottom-left chat input → **+** menu → **GitHub** → **Connect project**
+2. Authorize the Lovable GitHub App
+3. Pick the account/org → **Create Repository**
 
----
+Lovable will push the full codebase and keep it in two-way sync (edits in GitHub sync back to Lovable, and vice versa).
 
-### 1. Database migration
+*(Alternative if you don't want GitHub: on a paid workspace, open the Code Editor → **Download codebase** at the bottom of the file tree.)*
 
-**Extend `audit_frameworks`:**
-- `criteria jsonb` — list of parameters: `[{ no, name, guidance, max:2 }]`
-- `zero_tolerance text` — optional ZT rule (e.g. "Pitching irrelevant programs")
-- `kind text` — `'call' | 'chat'`
+### Step 2 — Clone locally and open in Claude Code
+```bash
+git clone https://github.com/<you>/<repo>.git
+cd <repo>
+bun install     # or npm install
+claude          # start Claude Code in this directory
+```
 
-**Extend `audits`:**
-- `ai_result jsonb` — full AI output (per-parameter scores, evidence, summary, strengths, improvements)
-- `edited_by_expert boolean default false`
-- `locked boolean default false` — true after expert saves
-- `challenge_count int default 0` — coach challenges issued (max 1 → unlocks one re-edit)
-- `re_edit_allowed boolean default false` — set true when coach challenges
-- `final_total int`, `final_max int`, `final_rag text` — final values after expert edits (separate from raw `ai_result`)
+### Step 3 — Set up environment variables locally
+Lovable Cloud secrets (Supabase URL/keys, `LOVABLE_API_KEY`, `GOQII_CLIENT_SECRET`, `ASR_API_KEY`, etc.) are **not** in the repo. Create a local `.env` with:
 
-**Extend `audit_scores`:**
-- `expert_note text` — note expert adds when challenging a score
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` — copy from the Lovable-generated `.env` (visible in the code editor)
+- `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` — same values, server-side names
+- `LOVABLE_API_KEY` — **only works when the app runs on Lovable infrastructure**. For local dev with Claude Code, either:
+  - keep AI/transcription features working by deploying via Lovable and testing there, **or**
+  - swap the AI SDK provider to a direct Anthropic/OpenAI/Gemini key you own (I can do that swap if you want)
+- `GOQII_CLIENT_SECRET`, `ASR_API_KEY` — get these from the third-party services directly
 
-**Seed 2 frameworks:**
-- **NHS Call Audit** — 15 parameters from the call sheet, max 30, with ZT flag
-- **NHS Chat Audit** — parameters from the chat sheet, 0/1/2 each
+### Step 4 — Run locally
+```bash
+bun run dev
+```
+The TanStack Start dev server runs on `http://localhost:3000` (or `:8080`). Your Supabase database is the same one Lovable uses, so data/auth continues to work.
 
----
+### Things to know
+- **Two-way sync stays on** while GitHub is connected — pushes to `main` from Claude Code will appear in the Lovable preview automatically.
+- **`LOVABLE_API_KEY` is workspace-scoped** and only authenticates from Lovable-hosted runtimes. AI Gateway calls will 401 locally unless you switch to your own provider key.
+- **Auto-generated files** (`src/integrations/supabase/client.ts`, `types.ts`, `.env` Supabase entries, `src/routeTree.gen.ts`) — don't hand-edit; Lovable regenerates them on sync.
+- **Database migrations**: continue running them through Lovable (they apply to the shared Supabase project), or use the Supabase CLI pointed at the same project.
 
-### 2. Server function: `src/lib/qip/audit.functions.ts`
+### What I can do for you next (once you're back in build mode)
+- Rip out `LOVABLE_API_KEY` and replace the AI SDK provider with **Anthropic Claude via your own API key**, so audits/transcription work locally without Lovable infra.
+- Add a `README.md` with the local setup steps above committed to the repo.
+- Add an `.env.example` listing every variable Claude Code will need.
 
-`runAudit({ framework_id, transcript, turns, guidance, call_transcript_id })`:
-1. Load framework + criteria
-2. Call `google/gemini-3-flash-preview` via Lovable AI Gateway with `Output.object` Zod schema:
-   - `parameters: [{ no, name, score:0|1|2, reasoning, evidence_quote }]`
-   - `zero_tolerance_hit: boolean`, `zero_tolerance_reason?: string`
-   - `total`, `max`, `rag: 'red'|'amber'|'green'`
-   - `summary`, `strengths[]`, `improvements[]`
-3. System prompt: strict NHS QA auditor; score each parameter against its guidance; cite evidence; apply ZT rule (if hit → flag, score capped/zero per sheet rule)
-4. **Auto-save**: insert `audits` row (status=`completed`, `ai_result`, totals, `locked=false`), insert one `audit_scores` row per parameter, link `call_transcripts.audit_id` (persist transcript text now)
-5. Return `{ audit_id, result }`
-
-`challengeAudit({ audit_id, edited_scores: [{criterion_no, score, expert_note}] })`:
-- Requires `locked=false` OR (`locked=true` AND `re_edit_allowed=true`)
-- Updates `audit_scores`, recomputes `final_total`/`final_rag`, sets `locked=true`, `edited_by_expert=true`, resets `re_edit_allowed=false`
-
-`coachChallenge({ audit_id })`:
-- Coach role check; sets `re_edit_allowed=true`, increments `challenge_count` (block if already >0)
-
----
-
-### 3. UI on `/assigned-audits`
-
-After transcript renders:
-- **"Audit with AI"** button → dialog:
-  - Framework dropdown (Call / Chat) — auto-selected from call type if possible
-  - Guidance textarea (blank, optional, placeholder examples: "Focus on empathy", "Strict on ZT")
-  - **Run Audit** button → calls `runAudit` → renders result + auto-save toast
-
-**Audit result panel** (below transcript):
-- Header: total `X / 30`, RAG badge, ZT flag
-- Per-parameter cards: name, score chip (0/1/2), reasoning, evidence quote (collapsible)
-- Summary, Strengths, Improvements sections
-- **Challenge** button (visible if `!locked` OR `re_edit_allowed`) → switches cards to edit mode (score dropdown + note textarea per row) → **Save Audit** button
-- Small inline notice: *"Once saved, the audit cannot be edited again unless a coach challenges it."*
-- Once `locked=true`: read-only view with "Locked" badge
-
----
-
-### Open question
-Should the AI's raw audit be visible to the coach even before the expert challenges/saves, or only after the expert finalizes? (Default: coach sees only finalized audits.)
-
----
-
-### Out of scope (this round)
-- Coach review screen (we'll add the `coachChallenge` server fn + button; full coach dashboard later)
-- Bulk audit
-- Exporting audit PDF
+Tell me which of those (if any) you want done inside Lovable before you export, and I'll switch to build mode and do them.
