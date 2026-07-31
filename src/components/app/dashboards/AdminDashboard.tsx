@@ -247,8 +247,8 @@ export function AdminDashboard({ me }: { me: MeData }) {
           <Action to="/admin/audits"     icon={ClipboardCheck} tone="blue"   title="Assign Audits"      sub="Assign audits to experts" />
           <Action to="/admin/challenges" icon={ShieldCheck}    tone="rose"   title="Review Challenges"  sub="AI challenges pending review" />
           <Action to="/admin/audits"     icon={MessageSquare}  tone="orange" title="Review Objections"  sub="Coach objections pending" />
-          <Action to="/admin/coaches"    icon={UserPlus}       tone="emerald"title="Add Coach"          sub="Create a new coach" />
-          <Action to="/admin/experts"    icon={UserCog}        tone="purple" title="Add Expert"         sub="Create a new expert" />
+          <Action to="/admin/coaches"    icon={UserPlus}       tone="emerald"title="View Coaches"       sub="Browse all coaches" />
+          <Action to="/admin/experts"    icon={UserCog}        tone="purple" title="View Experts"        sub="Browse all experts" />
           <Action to="/admin/reports"    icon={FileBarChart}   tone="indigo" title="Generate Reports"   sub="Create custom reports" />
         </div>
       </div>
