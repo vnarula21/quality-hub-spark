@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/AppShell";
 import { RagBadge } from "@/components/app/RagBadge";
 import { Badge } from "@/components/ui/badge";
+import { ManagerAuditReview } from "@/components/audit/ManagerAuditReview";
 
 export const Route = createFileRoute("/_authenticated/admin/audits")({ component: AdminAudits });
 
@@ -24,7 +25,7 @@ function AdminAudits() {
       <div className="surface-card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
-            <tr><th className="px-4 py-3 text-left">Title</th><th className="px-4 py-3 text-left">Coach</th><th className="px-4 py-3 text-left">Expert</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">RAG</th><th className="px-4 py-3 text-left">Score</th></tr>
+            <tr><th className="px-4 py-3 text-left">Title</th><th className="px-4 py-3 text-left">Coach</th><th className="px-4 py-3 text-left">Expert</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">RAG</th><th className="px-4 py-3 text-left">Score</th><th className="px-4 py-3 text-right">Action</th></tr>
           </thead>
           <tbody className="divide-y">
             {(data ?? []).map((a: any) => (
@@ -35,6 +36,7 @@ function AdminAudits() {
                 <td className="px-4 py-3"><Badge variant="outline" className="capitalize">{a.status.replace(/_/g, " ")}</Badge></td>
                 <td className="px-4 py-3"><RagBadge rag={a.rag} /></td>
                 <td className="px-4 py-3">{Number(a.total_score ?? 0).toFixed(0)}/{a.max_score}</td>
+                <td className="px-4 py-3 text-right"><ManagerAuditReview auditId={a.id} /></td>
               </tr>
             ))}
           </tbody>

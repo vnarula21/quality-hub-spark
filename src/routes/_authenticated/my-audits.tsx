@@ -7,6 +7,8 @@ import { RagBadge } from "@/components/app/RagBadge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { coachChallengeAudit } from "@/lib/qip/audit.functions";
 
 export const Route = createFileRoute("/_authenticated/my-audits")({
   component: MyAudits,
@@ -15,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/my-audits")({
 function MyAudits() {
   const { data: me } = useMe();
   const coachId = me?.coachId;
+  const challenge = useServerFn(coachChallengeAudit);
   const { data: audits, refetch } = useQuery({
     queryKey: ["my-audits", coachId],
     enabled: !!coachId,
@@ -23,6 +26,16 @@ function MyAudits() {
       return data ?? [];
     },
   });
+
+  async function handleChallenge(auditId: string) {
+    try {
+      await challenge({ data: { audit_id: auditId } });
+      toast.success("Challenge raised — the auditor can now re-review and re-edit this audit.");
+      refetch();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not raise a challenge");
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -47,14 +60,20 @@ function MyAudits() {
                 <td className="px-4 py-3"><RagBadge rag={a.rag} /></td>
                 <td className="px-4 py-3">{Number(a.total_score ?? 0).toFixed(0)}/{a.max_score}</td>
                 <td className="px-4 py-3 text-muted-foreground">{a.conducted_at ? new Date(a.conducted_at).toLocaleDateString() : "—"}</td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-3 text-right space-x-2">
                   {a.status === "published" && !a.accepted_by_coach && (
                     <Button size="sm" variant="outline" onClick={async () => {
                       const { error } = await supabase.from("audits").update({ accepted_by_coach: true }).eq("id", a.id);
                       if (error) toast.error(error.message); else { toast.success("Audit accepted"); refetch(); }
                     }}>Accept</Button>
                   )}
+                  {a.status === "published" && !a.accepted_by_coach && a.locked && (a.challenge_count ?? 0) < 1 && (
+                    <Button size="sm" variant="ghost" onClick={() => handleChallenge(a.id)}>Challenge</Button>
+                  )}
                   {a.accepted_by_coach && <span className="text-xs text-success">Accepted</span>}
+                  {(a.challenge_count ?? 0) >= 1 && !a.accepted_by_coach && (
+                    <span className="text-xs text-muted-foreground">Challenged — pending re-review</span>
+                  )}
                 </td>
               </tr>
             ))}

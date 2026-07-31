@@ -70,7 +70,7 @@ function Users() {
                     <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Set role" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="admin">Quality Manager</SelectItem>
+                      <SelectItem value="admin">Manager</SelectItem>
                       <SelectItem value="expert">Expert</SelectItem>
                       <SelectItem value="coach">Coach</SelectItem>
                     </SelectContent>

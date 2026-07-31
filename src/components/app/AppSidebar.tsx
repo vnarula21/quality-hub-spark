@@ -1,8 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard, TrendingUp, ClipboardCheck, Star, MessageSquare, Trophy,
-  Bell, User as UserIcon, ClipboardList, History, BarChart3, Users, Shield,
-  KeyRound, Workflow, Layers, Settings, Sparkles, LineChart, FileText,
+  LayoutDashboard, ClipboardCheck, Bell, User as UserIcon, ClipboardList,
+  Users, Shield, KeyRound, FileText, UserCog,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -21,12 +20,7 @@ const NAV: Record<AppRole, { label: string; items: Item[] }[]> = {
       label: "Workspace",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-        { title: "My Performance", url: "/my-performance", icon: TrendingUp },
         { title: "My Audits", url: "/my-audits", icon: ClipboardCheck },
-        { title: "My Ratings", url: "/my-ratings", icon: Star },
-        { title: "My Testimonials", url: "/my-testimonials", icon: MessageSquare },
-        { title: "My Success Stories", url: "/my-success-stories", icon: Sparkles },
-        { title: "Achievements", url: "/achievements", icon: Trophy },
       ],
     },
     {
@@ -43,8 +37,6 @@ const NAV: Record<AppRole, { label: string; items: Item[] }[]> = {
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
         { title: "Audit", url: "/assigned-audits", icon: ClipboardList },
-        { title: "Audit History", url: "/audit-history", icon: History },
-        { title: "Reports", url: "/reports", icon: BarChart3 },
       ],
     },
     {
@@ -63,14 +55,13 @@ const NAV: Record<AppRole, { label: string; items: Item[] }[]> = {
         { title: "Audits", url: "/admin/audits", icon: ClipboardCheck },
         { title: "Challenges", url: "/admin/challenges", icon: Shield },
         { title: "Coaches", url: "/admin/coaches", icon: Users },
-        { title: "Experts", url: "/admin/experts", icon: Users },
+        { title: "Experts", url: "/admin/experts", icon: UserCog },
       ],
     },
     {
       label: "Insights",
       items: [
         { title: "Reports", url: "/admin/reports", icon: FileText },
-        { title: "Analytics", url: "/admin/analytics", icon: LineChart },
       ],
     },
     {
@@ -89,20 +80,12 @@ const NAV: Record<AppRole, { label: string; items: Item[] }[]> = {
         { title: "Users", url: "/admin/users", icon: Users },
         { title: "Roles", url: "/admin/roles", icon: Shield },
         { title: "Permissions", url: "/admin/permissions", icon: KeyRound },
+        { title: "Coach Assignment", url: "/admin/coach-assignment", icon: UserCog },
       ],
     },
     {
-      label: "Quality Setup",
+      label: "Account",
       items: [
-        { title: "Processes", url: "/admin/processes", icon: Workflow },
-        { title: "Frameworks", url: "/admin/frameworks", icon: Layers },
-      ],
-    },
-    {
-      label: "Insights & Settings",
-      items: [
-        { title: "Reports", url: "/admin/reports", icon: FileText },
-        { title: "System Settings", url: "/admin/settings", icon: Settings },
         { title: "Notifications", url: "/notifications", icon: Bell },
         { title: "Profile", url: "/profile", icon: UserIcon },
       ],
