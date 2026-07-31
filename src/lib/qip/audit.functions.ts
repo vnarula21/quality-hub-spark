@@ -150,15 +150,22 @@ ${dialogue}
       .maybeSingle();
     const expertId = expertRow?.id ?? null;
 
-    // coach_id is now explicitly selected by the auditor in the UI (a searchable
-    // dropdown of all coaches) rather than guessed. We still validate it exists
-    // to give a clear error instead of a raw FK violation.
+    // coach_id is explicitly selected by the auditor in the UI (restricted there
+    // to their assigned coaches). Enforce the same rule server-side: unless the
+    // caller is admin/super_admin, the selected coach must be assigned to them.
+    const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const roles = (roleRows ?? []).map((r) => r.role);
+    const isAdmin = roles.includes("admin") || roles.includes("super_admin");
+
     const { data: coachRow, error: coachErr } = await supabase
       .from("coaches")
-      .select("id")
+      .select("id, assigned_expert_id")
       .eq("id", data.coach_id)
       .maybeSingle();
     if (coachErr || !coachRow) throw new Error("Selected coach not found.");
+    if (!isAdmin && coachRow.assigned_expert_id !== expertId) {
+      throw new Error("This coach is not assigned to you. Ask an admin to assign them under Admin → Coaches.");
+    }
     const coachId = coachRow.id;
 
     // Insert audit

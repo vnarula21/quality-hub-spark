@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useMe } from "@/lib/qip/auth";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -48,15 +49,22 @@ export function AuditWithAI({
     queryFn: () => fetchFrameworks(),
   });
 
+  const { data: me } = useMe();
+  const isAdmin = me?.primaryRole === "admin" || me?.primaryRole === "super_admin";
+  const expertId = me?.expertId ?? null;
+
   const { data: coaches } = useQuery({
-    queryKey: ["coaches-for-audit"],
+    queryKey: ["coaches-for-audit", isAdmin, expertId],
+    enabled: isAdmin || !!expertId,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("coaches")
-        .select("id, profiles!coaches_profile_id_fkey(full_name, employee_code)")
+        .select("id, assigned_expert_id, profiles!coaches_profile_id_fkey(full_name, employee_code)")
         .order("id");
+      if (!isAdmin) q = q.eq("assigned_expert_id", expertId!);
+      const { data, error } = await q;
       if (error) throw new Error(error.message);
-      return (data ?? []) as Array<{ id: string; profiles: { full_name: string; employee_code: string | null } | null }>;
+      return (data ?? []) as Array<{ id: string; assigned_expert_id: string | null; profiles: { full_name: string; employee_code: string | null } | null }>;
     },
   });
 
@@ -187,34 +195,42 @@ export function AuditWithAI({
             {!previewOnly && (
               <div className="space-y-2">
                 <Label>Coach</Label>
-                <Input
-                  placeholder="Search coach by name or employee code…"
-                  value={coachSearch}
-                  onChange={(e) => setCoachSearch(e.target.value)}
-                  className="mb-1"
-                />
-                <Select value={coachId} onValueChange={setCoachId}>
-                  <SelectTrigger><SelectValue placeholder="Select the coach on this call/chat" /></SelectTrigger>
-                  <SelectContent>
-                    {(coaches ?? [])
-                      .filter((c) => {
-                        const q = coachSearch.trim().toLowerCase();
-                        if (!q) return true;
-                        const name = c.profiles?.full_name?.toLowerCase() ?? "";
-                        const code = c.profiles?.employee_code?.toLowerCase() ?? "";
-                        return name.includes(q) || code.includes(q);
-                      })
-                      .map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.profiles?.full_name ?? "Unnamed coach"}
-                          {c.profiles?.employee_code ? ` (${c.profiles.employee_code})` : ""}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-[11px] text-muted-foreground">
-                  This is who the audit score gets attributed to.
-                </p>
+                {!isAdmin && (coaches ?? []).length === 0 ? (
+                  <p className="text-xs text-amber-600 rounded border border-amber-500/30 bg-amber-500/5 p-2">
+                    No coaches are assigned to you yet. Ask an admin to assign coaches to you under Admin → Coaches.
+                  </p>
+                ) : (
+                  <>
+                    <Input
+                      placeholder="Search coach by name or employee code…"
+                      value={coachSearch}
+                      onChange={(e) => setCoachSearch(e.target.value)}
+                      className="mb-1"
+                    />
+                    <Select value={coachId} onValueChange={setCoachId}>
+                      <SelectTrigger><SelectValue placeholder="Select the coach on this call/chat" /></SelectTrigger>
+                      <SelectContent>
+                        {(coaches ?? [])
+                          .filter((c) => {
+                            const q = coachSearch.trim().toLowerCase();
+                            if (!q) return true;
+                            const name = c.profiles?.full_name?.toLowerCase() ?? "";
+                            const code = c.profiles?.employee_code?.toLowerCase() ?? "";
+                            return name.includes(q) || code.includes(q);
+                          })
+                          .map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.profiles?.full_name ?? "Unnamed coach"}
+                              {c.profiles?.employee_code ? ` (${c.profiles.employee_code})` : ""}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[11px] text-muted-foreground">
+                      This is who the audit score gets attributed to.
+                    </p>
+                  </>
+                )}
               </div>
             )}
             <div className="space-y-2">

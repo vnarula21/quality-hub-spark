@@ -511,6 +511,7 @@ export type Database = {
       }
       coaches: {
         Row: {
+          assigned_expert_id: string | null
           cpi: number | null
           created_at: string
           current_quality_score: number | null
@@ -525,6 +526,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_expert_id?: string | null
           cpi?: number | null
           created_at?: string
           current_quality_score?: number | null
@@ -539,6 +541,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_expert_id?: string | null
           cpi?: number | null
           created_at?: string
           current_quality_score?: number | null
@@ -553,6 +556,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "coaches_assigned_expert_id_fkey"
+            columns: ["assigned_expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "coaches_profile_id_fkey"
             columns: ["profile_id"]
