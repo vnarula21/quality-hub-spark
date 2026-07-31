@@ -1,12 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/AppShell";
 import { RagBadge } from "@/components/app/RagBadge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { useMe } from "@/lib/qip/auth";
 
 export const Route = createFileRoute("/_authenticated/admin/coaches")({ component: Page });
 
 function Page() {
+  const { data: me } = useMe();
+  const isSuperAdmin = me?.primaryRole === "super_admin";
+  const qc = useQueryClient();
+
   const { data } = useQuery({
     queryKey: ["admin-coaches"],
     queryFn: async () =>
@@ -17,6 +24,25 @@ function Page() {
           .order("cpi", { ascending: false })
       ).data ?? [],
   });
+
+  const { data: experts } = useQuery({
+    queryKey: ["admin-experts-list"],
+    enabled: isSuperAdmin,
+    queryFn: async () =>
+      (
+        await supabase.from("experts").select("id,profiles!experts_profile_id_fkey(full_name)").order("id")
+      ).data ?? [],
+  });
+
+  const assignExpert = async (coachId: string, expertId: string | null) => {
+    const { error } = await supabase.from("coaches").update({ assigned_expert_id: expertId }).eq("id", coachId);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(expertId ? "Auditor assigned" : "Auditor unassigned");
+      qc.invalidateQueries({ queryKey: ["admin-coaches"] });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader title="Coaches" description={`All coaches in the platform (${data?.length ?? 0}).`} />
@@ -47,7 +73,24 @@ function Page() {
                 <td className="px-4 py-3">{Number(c.current_quality_score).toFixed(1)}</td>
                 <td className="px-4 py-3">{Number(c.current_rating).toFixed(2)}★</td>
                 <td className="px-4 py-3"><RagBadge rag={c.current_rag} /></td>
-                <td className="px-4 py-3 text-muted-foreground">{c.experts?.profiles?.full_name ?? "Unassigned"}</td>
+                <td className="px-4 py-3">
+                  {isSuperAdmin ? (
+                    <Select
+                      value={c.assigned_expert_id ?? "none"}
+                      onValueChange={(v) => assignExpert(c.id, v === "none" ? null : v)}
+                    >
+                      <SelectTrigger className="h-8 w-48"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Unassigned</SelectItem>
+                        {(experts ?? []).map((e: any) => (
+                          <SelectItem key={e.id} value={e.id}>{e.profiles?.full_name ?? "Unnamed auditor"}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <span className="text-muted-foreground">{c.experts?.profiles?.full_name ?? "Unassigned"}</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

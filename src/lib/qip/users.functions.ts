@@ -8,6 +8,7 @@ const CreateUserInput = z.object({
   email: z.string().email(),
   role: z.enum(["super_admin", "admin", "expert", "coach"]),
   phone: z.string().optional().nullable(),
+  assigned_expert_id: z.string().uuid().optional().nullable(),
 });
 
 function generateTempPassword() {
@@ -57,7 +58,9 @@ export const createUser = createServerFn({ method: "POST" })
     // Coaches/experts need a matching row in their respective tables for the
     // rest of the app (dashboards, coach-assignment, audits) to work at all.
     if (data.role === "coach") {
-      const { error } = await supabaseAdmin.from("coaches").insert({ profile_id: newUserId });
+      const { error } = await supabaseAdmin
+        .from("coaches")
+        .insert({ profile_id: newUserId, assigned_expert_id: data.assigned_expert_id ?? null });
       if (error) throw new Error(`User created, but failed to create coach record: ${error.message}`);
     } else if (data.role === "expert") {
       const { error } = await supabaseAdmin.from("experts").insert({ profile_id: newUserId });

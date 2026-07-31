@@ -79,7 +79,6 @@ const NAV: Record<AppRole, { label: string; items: Item[] }[]> = {
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
         { title: "Users", url: "/admin/users", icon: Users },
         { title: "Roles & Permissions", url: "/admin/roles", icon: Shield },
-        { title: "Coach Assignment", url: "/admin/coach-assignment", icon: UserCog },
       ],
     },
     {

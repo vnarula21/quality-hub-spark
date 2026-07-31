@@ -34,31 +34,6 @@ function Users() {
     },
   });
 
-  const assign = async (userId: string, role: AppRole) => {
-    // remove existing roles then insert new (admin/super_admin only)
-    await supabase.from("user_roles").delete().eq("user_id", userId);
-    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-    if (error) { toast.error(error.message); return; }
-
-    // Make sure the matching coaches/experts row exists too - without this,
-    // a user tagged as coach/expert won't show up anywhere in the app.
-    if (role === "coach") {
-      const { data: existing } = await supabase.from("coaches").select("id").eq("profile_id", userId).maybeSingle();
-      if (!existing) {
-        const { error: cErr } = await supabase.from("coaches").insert({ profile_id: userId });
-        if (cErr) toast.error(`Role set, but couldn't create coach record: ${cErr.message}`);
-      }
-    } else if (role === "expert") {
-      const { data: existing } = await supabase.from("experts").select("id").eq("profile_id", userId).maybeSingle();
-      if (!existing) {
-        const { error: eErr } = await supabase.from("experts").insert({ profile_id: userId });
-        if (eErr) toast.error(`Role set, but couldn't create expert record: ${eErr.message}`);
-      }
-    }
-    toast.success("Role updated");
-    qc.invalidateQueries({ queryKey: ["all-users"] });
-  };
-
   const setStatus = async (userId: string, status: "active" | "inactive") => {
     const { error } = await supabase.from("profiles").update({ status, deactivated_at: status === "inactive" ? new Date().toISOString() : null }).eq("id", userId);
     if (error) toast.error(error.message);
@@ -71,13 +46,13 @@ function Users() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <PageHeader title="Users" description="Create, deactivate and assign roles across the platform." />
+        <PageHeader title="Users" description="Create and deactivate users. Roles are tagged when a user is created." />
         {isSuperAdmin && <CreateUserDialog onCreated={() => qc.invalidateQueries({ queryKey: ["all-users"] })} />}
       </div>
       <div className="surface-card overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
-            <tr><th className="px-4 py-3 text-left">User</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">Roles</th><th className="px-4 py-3 text-left">Assign role</th><th className="px-4 py-3 text-right">Action</th></tr>
+            <tr><th className="px-4 py-3 text-left">User</th><th className="px-4 py-3 text-left">Status</th><th className="px-4 py-3 text-left">Roles</th><th className="px-4 py-3 text-right">Action</th></tr>
           </thead>
           <tbody className="divide-y">
             {(data ?? []).map((u: any) => (
@@ -92,17 +67,6 @@ function Users() {
                     {u.roles.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
                     {u.roles.map((r: AppRole) => <Badge key={r} variant="secondary">{ROLE_LABEL[r]}</Badge>)}
                   </div>
-                </td>
-                <td className="px-4 py-3">
-                  <Select onValueChange={(v) => assign(u.id, v as AppRole)}>
-                    <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Set role" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="admin">Manager</SelectItem>
-                      <SelectItem value="expert">Auditor</SelectItem>
-                      <SelectItem value="coach">Coach</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </td>
                 <td className="px-4 py-3 text-right">
                   {u.status === "active" ? (
@@ -126,8 +90,18 @@ function CreateUserDialog({ onCreated }: { onCreated: () => void }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<AppRole>("coach");
+  const [assignedExpertId, setAssignedExpertId] = useState<string>("none");
   const [creating, setCreating] = useState(false);
   const [result, setResult] = useState<{ email: string; temp_password: string } | null>(null);
+
+  const { data: experts } = useQuery({
+    queryKey: ["experts-for-create-user"],
+    enabled: open && role === "coach",
+    queryFn: async () => {
+      const { data } = await supabase.from("experts").select("id,profiles!experts_profile_id_fkey(full_name)").order("id");
+      return (data ?? []) as Array<{ id: string; profiles: { full_name: string } | null }>;
+    },
+  });
 
   async function handleCreate() {
     if (!fullName.trim() || !email.trim()) {
@@ -136,11 +110,19 @@ function CreateUserDialog({ onCreated }: { onCreated: () => void }) {
     }
     setCreating(true);
     try {
-      const res = await create({ data: { full_name: fullName.trim(), email: email.trim(), role } });
+      const res = await create({
+        data: {
+          full_name: fullName.trim(),
+          email: email.trim(),
+          role,
+          assigned_expert_id: role === "coach" && assignedExpertId !== "none" ? assignedExpertId : null,
+        },
+      });
       setResult({ email: res.email, temp_password: res.temp_password });
       setFullName("");
       setEmail("");
       setRole("coach");
+      setAssignedExpertId("none");
       onCreated();
     } catch (e: any) {
       toast.error(e?.message ?? "Could not create user");
@@ -205,6 +187,20 @@ function CreateUserDialog({ onCreated }: { onCreated: () => void }) {
                 </SelectContent>
               </Select>
             </div>
+            {role === "coach" && (
+              <div className="space-y-2">
+                <Label>Assign to auditor (optional)</Label>
+                <Select value={assignedExpertId} onValueChange={setAssignedExpertId}>
+                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned — assign later</SelectItem>
+                    {(experts ?? []).map((e) => (
+                      <SelectItem key={e.id} value={e.id}>{e.profiles?.full_name ?? "Unnamed auditor"}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         )}
 

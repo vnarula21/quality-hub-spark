@@ -21,7 +21,6 @@ import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedAdminAuditsRouteImport } from './routes/_authenticated/admin/audits'
 import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_authenticated/admin/challenges'
-import { Route as AuthenticatedAdminCoachAssignmentRouteImport } from './routes/_authenticated/admin/coach-assignment'
 import { Route as AuthenticatedAdminCoachesRouteImport } from './routes/_authenticated/admin/coaches'
 import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin/experts'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
@@ -92,12 +91,6 @@ const AuthenticatedAdminChallengesRoute =
     path: '/admin/challenges',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedAdminCoachAssignmentRoute =
-  AuthenticatedAdminCoachAssignmentRouteImport.update({
-    id: '/admin/coach-assignment',
-    path: '/admin/coach-assignment',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedAdminCoachesRoute =
   AuthenticatedAdminCoachesRouteImport.update({
     id: '/admin/coaches',
@@ -144,7 +137,6 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/admin/audits': typeof AuthenticatedAdminAuditsRoute
   '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
-  '/admin/coach-assignment': typeof AuthenticatedAdminCoachAssignmentRoute
   '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -164,7 +156,6 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/admin/audits': typeof AuthenticatedAdminAuditsRoute
   '/admin/challenges': typeof AuthenticatedAdminChallengesRoute
-  '/admin/coach-assignment': typeof AuthenticatedAdminCoachAssignmentRoute
   '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -186,7 +177,6 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/admin/audits': typeof AuthenticatedAdminAuditsRoute
   '/_authenticated/admin/challenges': typeof AuthenticatedAdminChallengesRoute
-  '/_authenticated/admin/coach-assignment': typeof AuthenticatedAdminCoachAssignmentRoute
   '/_authenticated/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -208,7 +198,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/admin/audits'
     | '/admin/challenges'
-    | '/admin/coach-assignment'
     | '/admin/coaches'
     | '/admin/experts'
     | '/admin/reports'
@@ -228,7 +217,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/admin/audits'
     | '/admin/challenges'
-    | '/admin/coach-assignment'
     | '/admin/coaches'
     | '/admin/experts'
     | '/admin/reports'
@@ -249,7 +237,6 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/admin/audits'
     | '/_authenticated/admin/challenges'
-    | '/_authenticated/admin/coach-assignment'
     | '/_authenticated/admin/coaches'
     | '/_authenticated/admin/experts'
     | '/_authenticated/admin/reports'
@@ -353,13 +340,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminChallengesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin/coach-assignment': {
-      id: '/_authenticated/admin/coach-assignment'
-      path: '/admin/coach-assignment'
-      fullPath: '/admin/coach-assignment'
-      preLoaderRoute: typeof AuthenticatedAdminCoachAssignmentRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/admin/coaches': {
       id: '/_authenticated/admin/coaches'
       path: '/admin/coaches'
@@ -413,7 +393,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedAdminAuditsRoute: typeof AuthenticatedAdminAuditsRoute
   AuthenticatedAdminChallengesRoute: typeof AuthenticatedAdminChallengesRoute
-  AuthenticatedAdminCoachAssignmentRoute: typeof AuthenticatedAdminCoachAssignmentRoute
   AuthenticatedAdminCoachesRoute: typeof AuthenticatedAdminCoachesRoute
   AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
@@ -429,8 +408,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedAdminAuditsRoute: AuthenticatedAdminAuditsRoute,
   AuthenticatedAdminChallengesRoute: AuthenticatedAdminChallengesRoute,
-  AuthenticatedAdminCoachAssignmentRoute:
-    AuthenticatedAdminCoachAssignmentRoute,
   AuthenticatedAdminCoachesRoute: AuthenticatedAdminCoachesRoute,
   AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
