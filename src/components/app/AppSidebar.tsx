@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, ClipboardCheck, Bell, User as UserIcon, ClipboardList,
-  Users, Shield, KeyRound, FileText, UserCog,
+  Users, Shield, FileText, UserCog,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -78,8 +78,7 @@ const NAV: Record<AppRole, { label: string; items: Item[] }[]> = {
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
         { title: "Users", url: "/admin/users", icon: Users },
-        { title: "Roles", url: "/admin/roles", icon: Shield },
-        { title: "Permissions", url: "/admin/permissions", icon: KeyRound },
+        { title: "Roles & Permissions", url: "/admin/roles", icon: Shield },
         { title: "Coach Assignment", url: "/admin/coach-assignment", icon: UserCog },
       ],
     },

@@ -24,7 +24,6 @@ import { Route as AuthenticatedAdminChallengesRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminCoachAssignmentRouteImport } from './routes/_authenticated/admin/coach-assignment'
 import { Route as AuthenticatedAdminCoachesRouteImport } from './routes/_authenticated/admin/coaches'
 import { Route as AuthenticatedAdminExpertsRouteImport } from './routes/_authenticated/admin/experts'
-import { Route as AuthenticatedAdminPermissionsRouteImport } from './routes/_authenticated/admin/permissions'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin/reports'
 import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin/roles'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
@@ -111,12 +110,6 @@ const AuthenticatedAdminExpertsRoute =
     path: '/admin/experts',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedAdminPermissionsRoute =
-  AuthenticatedAdminPermissionsRouteImport.update({
-    id: '/admin/permissions',
-    path: '/admin/permissions',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedAdminReportsRoute =
   AuthenticatedAdminReportsRouteImport.update({
     id: '/admin/reports',
@@ -154,7 +147,6 @@ export interface FileRoutesByFullPath {
   '/admin/coach-assignment': typeof AuthenticatedAdminCoachAssignmentRoute
   '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
-  '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -175,7 +167,6 @@ export interface FileRoutesByTo {
   '/admin/coach-assignment': typeof AuthenticatedAdminCoachAssignmentRoute
   '/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/admin/experts': typeof AuthenticatedAdminExpertsRoute
-  '/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -198,7 +189,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/coach-assignment': typeof AuthenticatedAdminCoachAssignmentRoute
   '/_authenticated/admin/coaches': typeof AuthenticatedAdminCoachesRoute
   '/_authenticated/admin/experts': typeof AuthenticatedAdminExpertsRoute
-  '/_authenticated/admin/permissions': typeof AuthenticatedAdminPermissionsRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -221,7 +211,6 @@ export interface FileRouteTypes {
     | '/admin/coach-assignment'
     | '/admin/coaches'
     | '/admin/experts'
-    | '/admin/permissions'
     | '/admin/reports'
     | '/admin/roles'
     | '/admin/users'
@@ -242,7 +231,6 @@ export interface FileRouteTypes {
     | '/admin/coach-assignment'
     | '/admin/coaches'
     | '/admin/experts'
-    | '/admin/permissions'
     | '/admin/reports'
     | '/admin/roles'
     | '/admin/users'
@@ -264,7 +252,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/coach-assignment'
     | '/_authenticated/admin/coaches'
     | '/_authenticated/admin/experts'
-    | '/_authenticated/admin/permissions'
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/roles'
     | '/_authenticated/admin/users'
@@ -387,13 +374,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExpertsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin/permissions': {
-      id: '/_authenticated/admin/permissions'
-      path: '/admin/permissions'
-      fullPath: '/admin/permissions'
-      preLoaderRoute: typeof AuthenticatedAdminPermissionsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/admin/reports': {
       id: '/_authenticated/admin/reports'
       path: '/admin/reports'
@@ -436,7 +416,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminCoachAssignmentRoute: typeof AuthenticatedAdminCoachAssignmentRoute
   AuthenticatedAdminCoachesRoute: typeof AuthenticatedAdminCoachesRoute
   AuthenticatedAdminExpertsRoute: typeof AuthenticatedAdminExpertsRoute
-  AuthenticatedAdminPermissionsRoute: typeof AuthenticatedAdminPermissionsRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -454,7 +433,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedAdminCoachAssignmentRoute,
   AuthenticatedAdminCoachesRoute: AuthenticatedAdminCoachesRoute,
   AuthenticatedAdminExpertsRoute: AuthenticatedAdminExpertsRoute,
-  AuthenticatedAdminPermissionsRoute: AuthenticatedAdminPermissionsRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
