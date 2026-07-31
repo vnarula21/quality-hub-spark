@@ -14,12 +14,13 @@ const ragOf = (total: number, max: number): "red" | "amber" | "green" => {
 
 const RunAuditInput = z.object({
   framework_id: z.string().uuid(),
+  coach_id: z.string().uuid(),
   transcript: z.string().min(1),
   turns: z.array(z.object({ speaker: z.string(), text: z.string() })).optional().nullable(),
   guidance: z.string().optional().nullable(),
   source: z
     .object({
-      type: z.enum(["url", "upload"]),
+      type: z.enum(["url", "upload", "paste"]),
       url: z.string().nullable().optional(),
       file_name: z.string().nullable().optional(),
       language: z.string().nullable().optional(),
@@ -34,8 +35,8 @@ export const runAudit = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => RunAuditInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) throw new Error("Missing ANTHROPIC_API_KEY");
 
     // Load framework
     const { data: fw, error: fwErr } = await supabase
@@ -83,9 +84,9 @@ Conversation transcript:
 ${dialogue}
 """`;
 
-    const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway.server");
-    const gateway = createLovableAiGatewayProvider(apiKey);
-    const model = gateway("google/gemini-3-flash-preview");
+    const { createClaudeProvider } = await import("@/lib/ai-provider.server");
+    const claude = createClaudeProvider(apiKey);
+    const model = claude("claude-sonnet-4-5");
 
     const schema = z.object({
       parameters: z.array(
@@ -141,10 +142,7 @@ ${dialogue}
       .single();
     if (ctErr || !ct) throw new Error(`Could not save transcript: ${ctErr?.message}`);
 
-    // Resolve coach_id + expert_id for THIS user (expert running the audit). coach_id is required.
-    // For now, mirror coach_id from any coach record OR use a placeholder via expert profile.
-    // Read expert + an arbitrary coach link is not appropriate; instead require an existing coach context.
-    // To keep this self-contained, use the user's own expert id and pick the first coach as coach_id of self if missing.
+    // The expert running this audit is the currently authenticated user.
     const { data: expertRow } = await supabase
       .from("experts")
       .select("id")
@@ -152,16 +150,16 @@ ${dialogue}
       .maybeSingle();
     const expertId = expertRow?.id ?? null;
 
-    // coach_id is NOT NULL in schema. Use the current user's coach record if they are also a coach,
-    // otherwise fall back to ANY coach row owned by this user (rare). The proper coach assignment
-    // can be set later by an admin. If none exists, fail with a clear message.
-    const { data: coachRow } = await supabase
+    // coach_id is now explicitly selected by the auditor in the UI (a searchable
+    // dropdown of all coaches) rather than guessed. We still validate it exists
+    // to give a clear error instead of a raw FK violation.
+    const { data: coachRow, error: coachErr } = await supabase
       .from("coaches")
       .select("id")
-      .limit(1)
+      .eq("id", data.coach_id)
       .maybeSingle();
-    const coachId = coachRow?.id;
-    if (!coachId) throw new Error("No coach record exists to attach this audit to.");
+    if (coachErr || !coachRow) throw new Error("Selected coach not found.");
+    const coachId = coachRow.id;
 
     // Insert audit
     const { data: audit, error: aErr } = await supabase

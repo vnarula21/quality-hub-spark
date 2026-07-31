@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, MessageSquare, Loader2, Upload } from "lucide-react";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { transcribeUpload, transcribeUrl, saveTranscript } from "@/lib/qip/transcribe.functions";
+import { transcribeUpload, transcribeUrl, saveTranscript, parseTurns } from "@/lib/qip/transcribe.functions";
 import { toast } from "sonner";
 import { AuditWithAI } from "@/components/audit/AuditWithAI";
 
@@ -249,10 +250,141 @@ function CallAuditPanel() {
 
 
 function ChatAuditPanel() {
+  const runSave = useServerFn(saveTranscript);
+  const [raw, setRaw] = useState("");
+  const [swapSpeakers, setSwapSpeakers] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [savedExpiresAt, setSavedExpiresAt] = useState<string | null>(null);
+  const [committed, setCommitted] = useState<string | null>(null);
+
+  const turns = committed ? parseTurns(committed) : [];
+
+  function handleUseText() {
+    if (!raw.trim()) {
+      toast.error("Paste the chat conversation first");
+      return;
+    }
+    setCommitted(raw);
+    setSavedId(null);
+    setSavedExpiresAt(null);
+  }
+
+  async function handleSave() {
+    if (!committed) return;
+    setSaving(true);
+    try {
+      const saved = await runSave({
+        data: {
+          transcript: committed,
+          language: null,
+          duration: null,
+          segments: turns.length > 0 ? turns : null,
+          raw: null,
+          source_type: "paste",
+          file_name: null,
+        },
+      });
+      setSavedId(saved.id);
+      setSavedExpiresAt(saved.expires_at);
+      toast.success(`Saved — expires ${new Date(saved.expires_at).toLocaleDateString()}`);
+    } catch (e: any) {
+      console.error("save chat transcript error", e);
+      toast.error(e?.message ?? "Could not save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="surface-card p-5 space-y-5">
+      <div>
+        <div className="text-sm font-semibold">Chat audit</div>
+        <div className="text-xs text-muted-foreground">
+          Paste the chat conversation between coach and player, then run the AI audit.
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="chat-paste">Chat conversation</Label>
+        <Textarea
+          id="chat-paste"
+          rows={10}
+          placeholder={"Paste the raw chat log here. If it uses COACH: / PLAYER: prefixes, turns will be split and labeled automatically."}
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+        />
+        <Button onClick={handleUseText} size="sm">Use this conversation</Button>
+      </div>
+
+      {committed && (
+        <div className="rounded-lg border bg-secondary/30 p-4 space-y-3">
+          {turns.length >= 1 ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] text-muted-foreground">
+                  Detected COACH / PLAYER turns. Use Swap if reversed.
+                </p>
+                <Button variant="ghost" size="sm" onClick={() => setSwapSpeakers((s) => !s)}>
+                  Swap Coach / Player
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {turns.map((t, i) => {
+                  const isCoachLabel = t.speaker === "COACH";
+                  const isCoach = swapSpeakers ? !isCoachLabel : isCoachLabel;
+                  return (
+                    <div key={i} className={`flex ${isCoach ? "justify-start" : "justify-end"}`}>
+                      <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${isCoach ? "bg-background border" : "bg-primary/10 border border-primary/20"}`}>
+                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                          {isCoach ? "Coach" : "Player"}
+                        </div>
+                        <div className="whitespace-pre-wrap leading-relaxed">{t.text}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">{committed}</div>
+          )}
+          <div className="flex items-center gap-3 pt-1">
+            <Button onClick={handleSave} disabled={saving || !!savedId} size="sm">
+              {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : savedId ? "Saved" : "Save transcript"}
+            </Button>
+            {savedExpiresAt && (
+              <span className="text-[11px] text-muted-foreground">Auto-deletes on {new Date(savedExpiresAt).toLocaleDateString()}</span>
+            )}
+          </div>
+          <div className="pt-2 border-t">
+            <AuditWithAI
+              transcript={committed}
+              turns={
+                (turns ?? []).map((t) => ({
+                  speaker: (swapSpeakers ? (t.speaker === "COACH" ? "PLAYER" : "COACH") : t.speaker),
+                  text: t.text,
+                }))
+              }
+              source={{ type: "paste" }}
+              defaultKind="chat"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="pt-2 border-t">
+        <div className="text-xs font-semibold text-muted-foreground mb-2">Previously assigned chat audits</div>
+        <AssignedChatAudits />
+      </div>
+    </div>
+  );
+}
+
+function AssignedChatAudits() {
   const { data: me } = useMe();
   const expertId = me?.expertId;
   const { data } = useQuery({
-    queryKey: ["assigned", expertId],
+    queryKey: ["assigned-chat", expertId],
     enabled: !!expertId,
     queryFn: async () => {
       const { data } = await supabase

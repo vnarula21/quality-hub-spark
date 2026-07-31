@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -34,7 +35,7 @@ export function AuditWithAI({
 }: {
   transcript?: string;
   turns?: Turn[];
-  source?: { type: "url" | "upload"; url?: string; file_name?: string; language?: string | null; duration?: number | null };
+  source?: { type: "url" | "upload" | "paste"; url?: string; file_name?: string; language?: string | null; duration?: number | null };
   defaultKind: "call" | "chat";
   previewOnly?: boolean;
 }) {
@@ -47,9 +48,23 @@ export function AuditWithAI({
     queryFn: () => fetchFrameworks(),
   });
 
+  const { data: coaches } = useQuery({
+    queryKey: ["coaches-for-audit"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coaches")
+        .select("id, profiles!coaches_profile_id_fkey(full_name, employee_code)")
+        .order("id");
+      if (error) throw new Error(error.message);
+      return (data ?? []) as Array<{ id: string; profiles: { full_name: string; employee_code: string | null } | null }>;
+    },
+  });
+
   const callable = (frameworks ?? []).filter((f) => f.kind === defaultKind);
   const [open, setOpen] = useState(false);
   const [frameworkId, setFrameworkId] = useState<string>("");
+  const [coachId, setCoachId] = useState<string>("");
+  const [coachSearch, setCoachSearch] = useState("");
   const [guidance, setGuidance] = useState("");
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<AIResult | null>(null);
@@ -69,11 +84,16 @@ export function AuditWithAI({
       toast.error("Select a framework");
       return;
     }
+    if (!coachId) {
+      toast.error("Select the coach this call/chat belongs to");
+      return;
+    }
     setRunning(true);
     try {
       const res = await run({
         data: {
           framework_id: fid,
+          coach_id: coachId,
           transcript,
           turns: turns ?? [],
           guidance: guidance.trim() || null,
@@ -164,6 +184,39 @@ export function AuditWithAI({
                 </SelectContent>
               </Select>
             </div>
+            {!previewOnly && (
+              <div className="space-y-2">
+                <Label>Coach</Label>
+                <Input
+                  placeholder="Search coach by name or employee code…"
+                  value={coachSearch}
+                  onChange={(e) => setCoachSearch(e.target.value)}
+                  className="mb-1"
+                />
+                <Select value={coachId} onValueChange={setCoachId}>
+                  <SelectTrigger><SelectValue placeholder="Select the coach on this call/chat" /></SelectTrigger>
+                  <SelectContent>
+                    {(coaches ?? [])
+                      .filter((c) => {
+                        const q = coachSearch.trim().toLowerCase();
+                        if (!q) return true;
+                        const name = c.profiles?.full_name?.toLowerCase() ?? "";
+                        const code = c.profiles?.employee_code?.toLowerCase() ?? "";
+                        return name.includes(q) || code.includes(q);
+                      })
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.profiles?.full_name ?? "Unnamed coach"}
+                          {c.profiles?.employee_code ? ` (${c.profiles.employee_code})` : ""}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground">
+                  This is who the audit score gets attributed to.
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Guidance for the AI (optional)</Label>
               <Textarea

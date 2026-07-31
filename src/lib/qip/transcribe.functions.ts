@@ -15,7 +15,7 @@ export type TranscribeResult = {
   segments?: null;
 };
 
-function parseTurns(raw: string): DialogueTurn[] {
+export function parseTurns(raw: string): DialogueTurn[] {
   if (!raw || typeof raw !== "string") return [];
   // Match "COACH:" / "PLAYER:" prefixes (case-insensitive). They can appear
   // at the start of a line or inline if the API returned everything in one line.
@@ -138,14 +138,14 @@ export const saveTranscript = createServerFn({ method: "POST" })
     const o = input as any;
     if (!o || typeof o.transcript !== "string" || o.transcript.length === 0) throw new Error("Transcript is required");
     if (o.transcript.length > 200000) throw new Error("Transcript too large");
-    if (o.source_type !== "url" && o.source_type !== "upload") throw new Error("Invalid source_type");
+    if (o.source_type !== "url" && o.source_type !== "upload" && o.source_type !== "paste") throw new Error("Invalid source_type");
     return {
       transcript: o.transcript as string,
       language: typeof o.language === "string" ? o.language : null,
       duration_seconds: typeof o.duration === "number" ? o.duration : null,
       segments: o.segments ?? null,
       raw: o.raw ?? null,
-      source_type: o.source_type as "url" | "upload",
+      source_type: o.source_type as "url" | "upload" | "paste",
       source_url: typeof o.source_url === "string" ? o.source_url : null,
       file_name: typeof o.file_name === "string" ? o.file_name : null,
     };
