@@ -5,22 +5,16 @@ import type { MeData } from "@/lib/qip/auth";
 import {
   ClipboardCheck,
   CheckCircle2,
-  ShieldCheck,
   Users,
   Sparkles,
   PieChart as PieIcon,
   Calendar,
   Filter,
-  ChevronRight,
   Trophy,
-  UserPlus,
-  UserCog,
-  FileBarChart,
   ArrowUp,
   ArrowDown,
   Star,
   Gauge,
-  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -239,19 +233,6 @@ export function AdminDashboard({ me }: { me: MeData }) {
           </table>
         </div>
       </div>
-
-      {/* Quick Actions */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="text-sm font-semibold text-slate-900">Quick Actions</div>
-        <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
-          <Action to="/admin/audits"     icon={ClipboardCheck} tone="blue"   title="Assign Audits"      sub="Assign audits to experts" />
-          <Action to="/admin/challenges" icon={ShieldCheck}    tone="rose"   title="Review Challenges"  sub="AI challenges pending review" />
-          <Action to="/admin/audits"     icon={MessageSquare}  tone="orange" title="Review Objections"  sub="Coach objections pending" />
-          <Action to="/admin/coaches"    icon={UserPlus}       tone="emerald"title="View Coaches"       sub="Browse all coaches" />
-          <Action to="/admin/experts"    icon={UserCog}        tone="purple" title="View Experts"        sub="Browse all experts" />
-          <Action to="/admin/reports"    icon={FileBarChart}   tone="indigo" title="Generate Reports"   sub="Create custom reports" />
-        </div>
-      </div>
     </div>
   );
 }
@@ -296,20 +277,3 @@ function RagPill({ rag }: { rag: "red" | "amber" | "green" | null | undefined })
   return <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${map[rag]}`}>{rag}</span>;
 }
 
-function Action({ to, icon: Icon, tone, title, sub }: {
-  to: string; icon: LucideIcon; tone: Tone; title: string; sub: string;
-}) {
-  const t = toneMap[tone];
-  return (
-    <Link to={to} className="group flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white p-2.5 shadow-sm transition hover:border-slate-300 hover:shadow">
-      <div className={`grid h-9 w-9 place-items-center rounded-lg ${t.bg}`}>
-        <Icon className={`h-4 w-4 ${t.fg}`} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-slate-900">{title}</div>
-        <div className="truncate text-[11px] text-slate-500">{sub}</div>
-      </div>
-      <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500" />
-    </Link>
-  );
-}
